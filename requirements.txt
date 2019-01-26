@@ -1,0 +1,5 @@
+vega
+vega_datasets
+jupyter
+pandas
+draco
