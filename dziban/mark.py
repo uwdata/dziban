@@ -1,4 +1,7 @@
 class VizMark:
+  def __init__(self):
+    self._mark = None
+    
   def mark_area(self):
     self._mark = 'area'
     return self
@@ -43,5 +46,11 @@ class VizMark:
     self._mark = 'geoshape'
     return self
 
+  def _mark_partial(self):
+    return self._mark is None
+
   def build_mark(self):
-    return self._mark
+    if (self._mark):
+      return { 'mark': self._mark }
+    else:
+      return { 'mark': '?' }

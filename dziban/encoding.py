@@ -1,6 +1,11 @@
 class VizEncoding:
+  def __init__(self):
+    self._encoding = {}
+    self._encoding_wild = []
+    
   def encoding(
     self,
+    *argv,
     x=None,
     y=None,
     x2=None,
@@ -22,7 +27,6 @@ class VizEncoding:
     detail=None,
     row=None,
     column=None,
-    *argv
   ):
     self._encoding = {
       'x': x,
@@ -49,11 +53,34 @@ class VizEncoding:
     }
 
     self._encoding_wild = argv
+
     return self
 
+  def _encoding_partial(self):
+    return len(self._encoding_wild) != 0
+
   def build_encoding(self):
-    encoding = {}
-    for channel, enc in self._encoding.items():
-      if (enc is not None):
-        encoding[channel] = enc
-    return encoding
+    if (self._is_partial()):
+      # compassql
+      encodings = []
+      for channel, enc in self._encoding.items():
+        if (enc is not None):
+          encodings.append({
+            'channel': channel,
+            **enc
+          })
+
+      for field in self._encoding_wild:
+        encodings.append({
+          'channel': '?',
+          'field': field,
+        })
+
+      return { 'encodings': encodings }
+    else:
+      # vegalite
+      encoding = {}
+      for channel, enc in self._encoding.items():
+        if (enc is not None):
+          encoding[channel] = enc
+    return { 'encoding': encoding }
