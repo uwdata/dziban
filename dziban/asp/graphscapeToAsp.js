@@ -82,8 +82,16 @@ for (let name in encodingGroup) {
   } else if (action === 'move') {
     if (props.length === 2) {
       // field from V1 changed channel in V2, but did not swap
-      const move = `comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,${props[0]}), channel(V2,E2A,${props[1]}), channel(V1,E1B,${props[1]}), channel(V2,E2B,${props[0]}), field(V1,E1B,F1B), field(V2,E2B,F2B), E1A > E1B, E2A > E2B, F1B > F2B`;
-      rules.push(`${head} :- ${move}.`);
+      const move = `comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,${props[0]}), channel(V2,E2A,${props[1]})`;
+
+      // hard code for now since swaps are not exhaustive
+      if (props === ['x', 'y'] || props === ['row', 'column']) {
+        const duplicateSwap = `swap_${props.join('_')}`;
+        const duplicateRule = `not compare(edit_${duplicateSwap},V1,V2)`;
+        rules.push(`${head} :- ${duplicateRule}, ${move}.`);
+      } else {
+        rules.push(`${head} :- ${move}.`);
+      }
     }
   } else if (action === 'swap') {
     if (props.length === 2) {

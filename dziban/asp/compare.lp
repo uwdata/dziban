@@ -75,62 +75,62 @@ compare(edit_modify_size_remove_count,V1,V2) :- comparable(V1,V2), channel(V1,E1
 compare(edit_modify_row_remove_count,V1,V2) :- comparable(V1,V2), channel(V1,E1,row), channel(V2,E2,row), field(V2,E2,F2), not field(V1,_,F2), aggregate(V1,E1,count).
 compare(edit_modify_column_remove_count,V1,V2) :- comparable(V1,V2), channel(V1,E1,column), channel(V2,E2,column), field(V2,E2,F2), not field(V1,_,F2), aggregate(V1,E1,count).
 compare(edit_modify_text_remove_count,V1,V2) :- comparable(V1,V2), channel(V1,E1,text), channel(V2,E2,text), field(V2,E2,F2), not field(V1,_,F2), aggregate(V1,E1,count).
-compare(edit_move_x_row,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,x), channel(V2,E2A,row), channel(V1,E1B,row), channel(V2,E2B,x), field(V1,E1B,F1B), field(V2,E2B,F2B), E1A > E1B, E2A > E2B, F1B > F2B.
-compare(edit_move_x_column,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,x), channel(V2,E2A,column), channel(V1,E1B,column), channel(V2,E2B,x), field(V1,E1B,F1B), field(V2,E2B,F2B), E1A > E1B, E2A > E2B, F1B > F2B.
-compare(edit_move_x_size,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,x), channel(V2,E2A,size), channel(V1,E1B,size), channel(V2,E2B,x), field(V1,E1B,F1B), field(V2,E2B,F2B), E1A > E1B, E2A > E2B, F1B > F2B.
-compare(edit_move_x_shape,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,x), channel(V2,E2A,shape), channel(V1,E1B,shape), channel(V2,E2B,x), field(V1,E1B,F1B), field(V2,E2B,F2B), E1A > E1B, E2A > E2B, F1B > F2B.
-compare(edit_move_x_color,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,x), channel(V2,E2A,color), channel(V1,E1B,color), channel(V2,E2B,x), field(V1,E1B,F1B), field(V2,E2B,F2B), E1A > E1B, E2A > E2B, F1B > F2B.
-compare(edit_move_x_y,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,x), channel(V2,E2A,y), channel(V1,E1B,y), channel(V2,E2B,x), field(V1,E1B,F1B), field(V2,E2B,F2B), E1A > E1B, E2A > E2B, F1B > F2B.
-compare(edit_move_x_text,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,x), channel(V2,E2A,text), channel(V1,E1B,text), channel(V2,E2B,x), field(V1,E1B,F1B), field(V2,E2B,F2B), E1A > E1B, E2A > E2B, F1B > F2B.
-compare(edit_move_y_row,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,y), channel(V2,E2A,row), channel(V1,E1B,row), channel(V2,E2B,y), field(V1,E1B,F1B), field(V2,E2B,F2B), E1A > E1B, E2A > E2B, F1B > F2B.
-compare(edit_move_y_column,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,y), channel(V2,E2A,column), channel(V1,E1B,column), channel(V2,E2B,y), field(V1,E1B,F1B), field(V2,E2B,F2B), E1A > E1B, E2A > E2B, F1B > F2B.
-compare(edit_move_y_size,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,y), channel(V2,E2A,size), channel(V1,E1B,size), channel(V2,E2B,y), field(V1,E1B,F1B), field(V2,E2B,F2B), E1A > E1B, E2A > E2B, F1B > F2B.
-compare(edit_move_y_shape,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,y), channel(V2,E2A,shape), channel(V1,E1B,shape), channel(V2,E2B,y), field(V1,E1B,F1B), field(V2,E2B,F2B), E1A > E1B, E2A > E2B, F1B > F2B.
-compare(edit_move_y_color,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,y), channel(V2,E2A,color), channel(V1,E1B,color), channel(V2,E2B,y), field(V1,E1B,F1B), field(V2,E2B,F2B), E1A > E1B, E2A > E2B, F1B > F2B.
-compare(edit_move_y_x,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,y), channel(V2,E2A,x), channel(V1,E1B,x), channel(V2,E2B,y), field(V1,E1B,F1B), field(V2,E2B,F2B), E1A > E1B, E2A > E2B, F1B > F2B.
-compare(edit_move_y_text,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,y), channel(V2,E2A,text), channel(V1,E1B,text), channel(V2,E2B,y), field(V1,E1B,F1B), field(V2,E2B,F2B), E1A > E1B, E2A > E2B, F1B > F2B.
-compare(edit_move_color_row,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,color), channel(V2,E2A,row), channel(V1,E1B,row), channel(V2,E2B,color), field(V1,E1B,F1B), field(V2,E2B,F2B), E1A > E1B, E2A > E2B, F1B > F2B.
-compare(edit_move_color_column,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,color), channel(V2,E2A,column), channel(V1,E1B,column), channel(V2,E2B,color), field(V1,E1B,F1B), field(V2,E2B,F2B), E1A > E1B, E2A > E2B, F1B > F2B.
-compare(edit_move_color_size,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,color), channel(V2,E2A,size), channel(V1,E1B,size), channel(V2,E2B,color), field(V1,E1B,F1B), field(V2,E2B,F2B), E1A > E1B, E2A > E2B, F1B > F2B.
-compare(edit_move_color_shape,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,color), channel(V2,E2A,shape), channel(V1,E1B,shape), channel(V2,E2B,color), field(V1,E1B,F1B), field(V2,E2B,F2B), E1A > E1B, E2A > E2B, F1B > F2B.
-compare(edit_move_color_y,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,color), channel(V2,E2A,y), channel(V1,E1B,y), channel(V2,E2B,color), field(V1,E1B,F1B), field(V2,E2B,F2B), E1A > E1B, E2A > E2B, F1B > F2B.
-compare(edit_move_color_x,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,color), channel(V2,E2A,x), channel(V1,E1B,x), channel(V2,E2B,color), field(V1,E1B,F1B), field(V2,E2B,F2B), E1A > E1B, E2A > E2B, F1B > F2B.
-compare(edit_move_color_text,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,color), channel(V2,E2A,text), channel(V1,E1B,text), channel(V2,E2B,color), field(V1,E1B,F1B), field(V2,E2B,F2B), E1A > E1B, E2A > E2B, F1B > F2B.
-compare(edit_move_shape_row,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,shape), channel(V2,E2A,row), channel(V1,E1B,row), channel(V2,E2B,shape), field(V1,E1B,F1B), field(V2,E2B,F2B), E1A > E1B, E2A > E2B, F1B > F2B.
-compare(edit_move_shape_column,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,shape), channel(V2,E2A,column), channel(V1,E1B,column), channel(V2,E2B,shape), field(V1,E1B,F1B), field(V2,E2B,F2B), E1A > E1B, E2A > E2B, F1B > F2B.
-compare(edit_move_shape_size,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,shape), channel(V2,E2A,size), channel(V1,E1B,size), channel(V2,E2B,shape), field(V1,E1B,F1B), field(V2,E2B,F2B), E1A > E1B, E2A > E2B, F1B > F2B.
-compare(edit_move_shape_color,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,shape), channel(V2,E2A,color), channel(V1,E1B,color), channel(V2,E2B,shape), field(V1,E1B,F1B), field(V2,E2B,F2B), E1A > E1B, E2A > E2B, F1B > F2B.
-compare(edit_move_shape_y,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,shape), channel(V2,E2A,y), channel(V1,E1B,y), channel(V2,E2B,shape), field(V1,E1B,F1B), field(V2,E2B,F2B), E1A > E1B, E2A > E2B, F1B > F2B.
-compare(edit_move_shape_x,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,shape), channel(V2,E2A,x), channel(V1,E1B,x), channel(V2,E2B,shape), field(V1,E1B,F1B), field(V2,E2B,F2B), E1A > E1B, E2A > E2B, F1B > F2B.
-compare(edit_move_shape_text,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,shape), channel(V2,E2A,text), channel(V1,E1B,text), channel(V2,E2B,shape), field(V1,E1B,F1B), field(V2,E2B,F2B), E1A > E1B, E2A > E2B, F1B > F2B.
-compare(edit_move_size_row,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,size), channel(V2,E2A,row), channel(V1,E1B,row), channel(V2,E2B,size), field(V1,E1B,F1B), field(V2,E2B,F2B), E1A > E1B, E2A > E2B, F1B > F2B.
-compare(edit_move_size_column,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,size), channel(V2,E2A,column), channel(V1,E1B,column), channel(V2,E2B,size), field(V1,E1B,F1B), field(V2,E2B,F2B), E1A > E1B, E2A > E2B, F1B > F2B.
-compare(edit_move_size_shape,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,size), channel(V2,E2A,shape), channel(V1,E1B,shape), channel(V2,E2B,size), field(V1,E1B,F1B), field(V2,E2B,F2B), E1A > E1B, E2A > E2B, F1B > F2B.
-compare(edit_move_size_color,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,size), channel(V2,E2A,color), channel(V1,E1B,color), channel(V2,E2B,size), field(V1,E1B,F1B), field(V2,E2B,F2B), E1A > E1B, E2A > E2B, F1B > F2B.
-compare(edit_move_size_y,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,size), channel(V2,E2A,y), channel(V1,E1B,y), channel(V2,E2B,size), field(V1,E1B,F1B), field(V2,E2B,F2B), E1A > E1B, E2A > E2B, F1B > F2B.
-compare(edit_move_size_x,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,size), channel(V2,E2A,x), channel(V1,E1B,x), channel(V2,E2B,size), field(V1,E1B,F1B), field(V2,E2B,F2B), E1A > E1B, E2A > E2B, F1B > F2B.
-compare(edit_move_size_text,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,size), channel(V2,E2A,text), channel(V1,E1B,text), channel(V2,E2B,size), field(V1,E1B,F1B), field(V2,E2B,F2B), E1A > E1B, E2A > E2B, F1B > F2B.
-compare(edit_move_text_row,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,text), channel(V2,E2A,row), channel(V1,E1B,row), channel(V2,E2B,text), field(V1,E1B,F1B), field(V2,E2B,F2B), E1A > E1B, E2A > E2B, F1B > F2B.
-compare(edit_move_text_column,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,text), channel(V2,E2A,column), channel(V1,E1B,column), channel(V2,E2B,text), field(V1,E1B,F1B), field(V2,E2B,F2B), E1A > E1B, E2A > E2B, F1B > F2B.
-compare(edit_move_text_shape,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,text), channel(V2,E2A,shape), channel(V1,E1B,shape), channel(V2,E2B,text), field(V1,E1B,F1B), field(V2,E2B,F2B), E1A > E1B, E2A > E2B, F1B > F2B.
-compare(edit_move_text_color,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,text), channel(V2,E2A,color), channel(V1,E1B,color), channel(V2,E2B,text), field(V1,E1B,F1B), field(V2,E2B,F2B), E1A > E1B, E2A > E2B, F1B > F2B.
-compare(edit_move_text_y,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,text), channel(V2,E2A,y), channel(V1,E1B,y), channel(V2,E2B,text), field(V1,E1B,F1B), field(V2,E2B,F2B), E1A > E1B, E2A > E2B, F1B > F2B.
-compare(edit_move_text_x,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,text), channel(V2,E2A,x), channel(V1,E1B,x), channel(V2,E2B,text), field(V1,E1B,F1B), field(V2,E2B,F2B), E1A > E1B, E2A > E2B, F1B > F2B.
-compare(edit_move_text_size,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,text), channel(V2,E2A,size), channel(V1,E1B,size), channel(V2,E2B,text), field(V1,E1B,F1B), field(V2,E2B,F2B), E1A > E1B, E2A > E2B, F1B > F2B.
-compare(edit_move_column_row,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,column), channel(V2,E2A,row), channel(V1,E1B,row), channel(V2,E2B,column), field(V1,E1B,F1B), field(V2,E2B,F2B), E1A > E1B, E2A > E2B, F1B > F2B.
-compare(edit_move_column_size,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,column), channel(V2,E2A,size), channel(V1,E1B,size), channel(V2,E2B,column), field(V1,E1B,F1B), field(V2,E2B,F2B), E1A > E1B, E2A > E2B, F1B > F2B.
-compare(edit_move_column_shape,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,column), channel(V2,E2A,shape), channel(V1,E1B,shape), channel(V2,E2B,column), field(V1,E1B,F1B), field(V2,E2B,F2B), E1A > E1B, E2A > E2B, F1B > F2B.
-compare(edit_move_column_color,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,column), channel(V2,E2A,color), channel(V1,E1B,color), channel(V2,E2B,column), field(V1,E1B,F1B), field(V2,E2B,F2B), E1A > E1B, E2A > E2B, F1B > F2B.
-compare(edit_move_column_y,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,column), channel(V2,E2A,y), channel(V1,E1B,y), channel(V2,E2B,column), field(V1,E1B,F1B), field(V2,E2B,F2B), E1A > E1B, E2A > E2B, F1B > F2B.
-compare(edit_move_column_x,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,column), channel(V2,E2A,x), channel(V1,E1B,x), channel(V2,E2B,column), field(V1,E1B,F1B), field(V2,E2B,F2B), E1A > E1B, E2A > E2B, F1B > F2B.
-compare(edit_move_column_text,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,column), channel(V2,E2A,text), channel(V1,E1B,text), channel(V2,E2B,column), field(V1,E1B,F1B), field(V2,E2B,F2B), E1A > E1B, E2A > E2B, F1B > F2B.
-compare(edit_move_row_column,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,row), channel(V2,E2A,column), channel(V1,E1B,column), channel(V2,E2B,row), field(V1,E1B,F1B), field(V2,E2B,F2B), E1A > E1B, E2A > E2B, F1B > F2B.
-compare(edit_move_row_size,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,row), channel(V2,E2A,size), channel(V1,E1B,size), channel(V2,E2B,row), field(V1,E1B,F1B), field(V2,E2B,F2B), E1A > E1B, E2A > E2B, F1B > F2B.
-compare(edit_move_row_shape,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,row), channel(V2,E2A,shape), channel(V1,E1B,shape), channel(V2,E2B,row), field(V1,E1B,F1B), field(V2,E2B,F2B), E1A > E1B, E2A > E2B, F1B > F2B.
-compare(edit_move_row_color,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,row), channel(V2,E2A,color), channel(V1,E1B,color), channel(V2,E2B,row), field(V1,E1B,F1B), field(V2,E2B,F2B), E1A > E1B, E2A > E2B, F1B > F2B.
-compare(edit_move_row_y,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,row), channel(V2,E2A,y), channel(V1,E1B,y), channel(V2,E2B,row), field(V1,E1B,F1B), field(V2,E2B,F2B), E1A > E1B, E2A > E2B, F1B > F2B.
-compare(edit_move_row_x,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,row), channel(V2,E2A,x), channel(V1,E1B,x), channel(V2,E2B,row), field(V1,E1B,F1B), field(V2,E2B,F2B), E1A > E1B, E2A > E2B, F1B > F2B.
-compare(edit_move_row_text,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,row), channel(V2,E2A,text), channel(V1,E1B,text), channel(V2,E2B,row), field(V1,E1B,F1B), field(V2,E2B,F2B), E1A > E1B, E2A > E2B, F1B > F2B.
+compare(edit_move_x_row,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,x), channel(V2,E2A,row).
+compare(edit_move_x_column,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,x), channel(V2,E2A,column).
+compare(edit_move_x_size,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,x), channel(V2,E2A,size).
+compare(edit_move_x_shape,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,x), channel(V2,E2A,shape).
+compare(edit_move_x_color,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,x), channel(V2,E2A,color).
+compare(edit_move_x_y,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,x), channel(V2,E2A,y).
+compare(edit_move_x_text,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,x), channel(V2,E2A,text).
+compare(edit_move_y_row,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,y), channel(V2,E2A,row).
+compare(edit_move_y_column,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,y), channel(V2,E2A,column).
+compare(edit_move_y_size,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,y), channel(V2,E2A,size).
+compare(edit_move_y_shape,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,y), channel(V2,E2A,shape).
+compare(edit_move_y_color,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,y), channel(V2,E2A,color).
+compare(edit_move_y_x,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,y), channel(V2,E2A,x).
+compare(edit_move_y_text,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,y), channel(V2,E2A,text).
+compare(edit_move_color_row,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,color), channel(V2,E2A,row).
+compare(edit_move_color_column,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,color), channel(V2,E2A,column).
+compare(edit_move_color_size,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,color), channel(V2,E2A,size).
+compare(edit_move_color_shape,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,color), channel(V2,E2A,shape).
+compare(edit_move_color_y,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,color), channel(V2,E2A,y).
+compare(edit_move_color_x,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,color), channel(V2,E2A,x).
+compare(edit_move_color_text,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,color), channel(V2,E2A,text).
+compare(edit_move_shape_row,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,shape), channel(V2,E2A,row).
+compare(edit_move_shape_column,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,shape), channel(V2,E2A,column).
+compare(edit_move_shape_size,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,shape), channel(V2,E2A,size).
+compare(edit_move_shape_color,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,shape), channel(V2,E2A,color).
+compare(edit_move_shape_y,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,shape), channel(V2,E2A,y).
+compare(edit_move_shape_x,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,shape), channel(V2,E2A,x).
+compare(edit_move_shape_text,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,shape), channel(V2,E2A,text).
+compare(edit_move_size_row,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,size), channel(V2,E2A,row).
+compare(edit_move_size_column,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,size), channel(V2,E2A,column).
+compare(edit_move_size_shape,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,size), channel(V2,E2A,shape).
+compare(edit_move_size_color,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,size), channel(V2,E2A,color).
+compare(edit_move_size_y,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,size), channel(V2,E2A,y).
+compare(edit_move_size_x,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,size), channel(V2,E2A,x).
+compare(edit_move_size_text,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,size), channel(V2,E2A,text).
+compare(edit_move_text_row,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,text), channel(V2,E2A,row).
+compare(edit_move_text_column,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,text), channel(V2,E2A,column).
+compare(edit_move_text_shape,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,text), channel(V2,E2A,shape).
+compare(edit_move_text_color,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,text), channel(V2,E2A,color).
+compare(edit_move_text_y,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,text), channel(V2,E2A,y).
+compare(edit_move_text_x,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,text), channel(V2,E2A,x).
+compare(edit_move_text_size,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,text), channel(V2,E2A,size).
+compare(edit_move_column_row,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,column), channel(V2,E2A,row).
+compare(edit_move_column_size,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,column), channel(V2,E2A,size).
+compare(edit_move_column_shape,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,column), channel(V2,E2A,shape).
+compare(edit_move_column_color,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,column), channel(V2,E2A,color).
+compare(edit_move_column_y,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,column), channel(V2,E2A,y).
+compare(edit_move_column_x,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,column), channel(V2,E2A,x).
+compare(edit_move_column_text,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,column), channel(V2,E2A,text).
+compare(edit_move_row_column,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,row), channel(V2,E2A,column).
+compare(edit_move_row_size,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,row), channel(V2,E2A,size).
+compare(edit_move_row_shape,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,row), channel(V2,E2A,shape).
+compare(edit_move_row_color,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,row), channel(V2,E2A,color).
+compare(edit_move_row_y,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,row), channel(V2,E2A,y).
+compare(edit_move_row_x,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,row), channel(V2,E2A,x).
+compare(edit_move_row_text,V1,V2) :- comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,row), channel(V2,E2A,text).
 compare(edit_swap_x_y,V1,V2) :- comparable(V1,V2), channel(V1,E1A,x), channel(V1,E1B,y), channel(V2,E2A,x), channel(V2,E2B,y), field(V1,E1A,FA), field(V2,E2B,FA), field(V1,E1B,FB), field(V2,E2A,FB), E2A > E2B, E1A > E1B.
 compare(edit_swap_row_column,V1,V2) :- comparable(V1,V2), channel(V1,E1A,row), channel(V1,E1B,column), channel(V2,E2A,row), channel(V2,E2B,column), field(V1,E1A,FA), field(V2,E2B,FA), field(V1,E1B,FB), field(V2,E2A,FB), E2A > E2B, E1A > E1B.
 
@@ -143,6 +143,6 @@ compare(edit_scale,V1,V2) :- comparable(V1,V2), field(V1,E1,F), field(V2,E2,F), 
 compare(edit_bin,V1,V2) :- comparable(V1,V2), field(V1,E1,F), field(V2,E2,F), bin(V1,E1,_), not bin(V2,E2,_).
 compare(edit_bin,V1,V2) :- comparable(V1,V2), field(V1,E1,F), field(V2,E2,F), not bin(V1,E1,_), bin(V2,E2,_).
 
-compare(edit_aggregate,V1,V2) :- comparable(V1,V2), aggregate(V1,E,A1), aggregate(V2,E,A2), A1 != A2.
-compare(edit_aggregate,V1,V2) :- comparable(V1,V2), aggregate(V1,E,_), not aggregate(V2,E,_).
-compare(edit_aggregate,V1,V2) :- comparable(V1,V2), not aggregate(V1,E,_), aggregate(V2,E,_).
+compare(edit_aggregate,V1,V2) :- comparable(V1,V2), field(V1,E1,F), field(V2,E2,F), aggregate(V1,E1,A1), aggregate(V2,E2,A2), A1 != A2.
+compare(edit_aggregate,V1,V2) :- comparable(V1,V2), field(V1,E1,F), field(V2,E2,F), aggregate(V1,E1,_), not aggregate(V2,E2,_).
+compare(edit_aggregate,V1,V2) :- comparable(V1,V2), field(V1,E1,F), field(V2,E2,F), not aggregate(V1,E1,_), aggregate(V2,E2,_).
