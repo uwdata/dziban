@@ -48,12 +48,7 @@ class Chart:
 
     return asp
 
-  def see(self, *fields, anchor=None, name=None):
-    if (name is not None):
-      viewname = '\"{0}\"'.format(name)
-    else:
-      viewname = Chart.DEFAULT_NAME
-
+  def _query(self, fields, anchor, viewname):
     partial = self.as_asp(viewname, fields)
     asp = [] + partial
 
@@ -61,18 +56,27 @@ class Chart:
       anchor = '\"{0}\"'.format(anchor)
       asp += self._anchors[anchor]
 
+    return partial, asp
+
+  def see(self, *fields, anchor=None, name=None):
+    if (name is not None):
+      viewname = '\"{0}\"'.format(name)
+    else:
+      viewname = Chart.DEFAULT_NAME
+
+    partial, asp = self._query(fields, anchor, viewname)
+
     self._sol = draco(asp)
 
     if (name is not None):
-      self._anchors[viewname] = anchor_spec(partial, self._sol.props)
-
+      self._anchors[viewname] = anchor_spec(partial, self._sol.props, viewname)
 
     return VegaLite(self._sol.as_vl(viewname), self._data)
 
-def anchor_spec(partial, complete):
+def anchor_spec(partial, complete, name):
   REGEX = re.compile(r'(\w+)\(([\w\.\"\/]+)(,([\w\"\.]+))?(,([\w\.\"]+))?\)')
 
-  asp = partial + complete
+  asp = partial + complete + ['base({0}).'.format(name)]
 
   def inc_predicate(dict, pred):
     (count, params) = dict[pred]
