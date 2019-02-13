@@ -35,28 +35,94 @@ fs.writeFileSync(`${output_dir}/graphscape.lp`, weightsOutput);
 const rules = [];
 const markGroup = def.DEFAULT_EDIT_OPS['markEditOps'];
 
+rules.push(`comparable(V1,V2) :- visualization(V1), base(V1), visualization(V2), V1 != V2.`)
+
+rules.push(`% MARK EDITS`);
 for (let name in markGroup) {
   name = name.toLowerCase();
   const marks = name.split('_');
-  const rule = `compare(edit_${name},V1,V2) :- mark(V1,${marks[0]}), mark(V2,${marks[1]}).`;
+  const rule = `compare(edit_${name},V1,V2) :- comparable(V1,V2), mark(V1,${marks[0]}), mark(V2,${marks[1]}).`;
 
   rules.push(rule);
 }
 
-const encodingGroup = def.DEFAULT_EDIT_OPS['encodingEditOps'];
+rules.push('\n');
 
+const encodingGroup = def.DEFAULT_EDIT_OPS['encodingEditOps'];
+rules.push(`% ENCODING EDITS`);
 for (let name in encodingGroup) {
   name = name.toLowerCase();
-  tokens = name.split('_');
-  action = tokens[0];
-  props = tokens.splice(1);
+  const tokens = name.split('_');
+  const action = tokens[0];
+  const props = tokens.slice(1);
 
+  const head = `compare(edit_${name},V1,V2)`;
   if (action === 'add') {
+    const add = `comparable(V1,V2), channel(V2,E2,${props[0]}), field(V2,E2,F2), not channel(V1,_,${props[0]}), not field(V1,_,F2)`;
     if (props.length === 1) {
-      rules.push(`compare(edit_${name},V1,V2) :- `)
+      const duplicateCount = `${name}_count`;
+      const duplicateRule = `not compare(edit_${duplicateCount},V1,V2)`;  // don't double dip count case
+      rules.push(`${head} :- ${duplicateRule}, ${add}.`)
+    } else if (props.length === 2) {
+      if (props[1] === 'count') {
+        rules.push(`${head} :- ${add}, aggregate(V2,E2,count).`)
+      }
     }
-  }
+  } else if (action === 'remove') {
+    const remove = `comparable(V1,V2), channel(V1,E1,${props[0]}), field(V1,E1,F1), not channel(V2,_,${props[0]}), not field(V2,_,F1)`
+    if (props.length === 1) {
+      const duplicateCount = `${name}_count`;
+      const duplicateRule = `not compare(edit_${duplicateCount},V1,V2)`;  // don't double dip count case
+      rules.push(`${head} :- ${duplicateRule}, ${remove}.`)
+    } else if (props.length === 2) {
+      if (props[1] === 'count') {
+        rules.push(`${head} :- ${remove}, aggregate(V1,E1,count).`)
+      }
+    }
+  } else if (action === 'move') {
+    if (props.length === 2) {
+      // field from V1 changed channel in V2, but did not swap
+      const move = `comparable(V1,V2), field(V1,E1A,F), field(V2,E2A,F), channel(V1,E1A,${props[0]}), channel(V2,E2A,${props[1]}), channel(V1,E1B,${props[1]}), channel(V2,E2B,${props[0]}), field(V1,E1B,F1B), field(V2,E2B,F2B), E1A > E1B, E2A > E2B, F1B > F2B`;
+      rules.push(`${head} :- ${move}.`);
+    }
+  } else if (action === 'swap') {
+    if (props.length === 2) {
+      // field from V1 now in V2 channel, which had its field in the same V1 channel.
+      const swap = `comparable(V1,V2), channel(V1,E1A,${props[0]}), channel(V1,E1B,${props[1]}), channel(V2,E2A,${props[0]}), channel(V2,E2B,${props[1]}), field(V1,E1A,FA), field(V2,E2B,FA), field(V1,E1B,FB), field(V2,E2A,FB), E2A > E2B, E1A > E1B`;
+      rules.push(`${head} :- ${swap}.`);
+    }
+  } else if (action === 'modify') {
+    // field of a channel changed
+    const modify = `comparable(V1,V2), channel(V1,E1,${props[0]}), channel(V2,E2,${props[0]}), field(V2,E2,F2), not field(V1,_,F2)`;
+    if (props.length === 1) {
+      // don't double dip count, move, or swap cases
+      const duplicateModifyAddCount = `${name}_add_count`;
+      const duplicateModifyRemoveCount = `${name}_remove_count`;
+      const duplicateRule = `not compare(edit_${duplicateModifyAddCount},V1,V2), not compare(edit_${duplicateModifyRemoveCount},V1,V2)`;
+      rules.push(`${head} :- ${duplicateRule}, ${modify}.`)
+    } else if (props.length === 3) {
+      if (props[1] === 'add' && props[2] === 'count') {
+        rules.push(`${head} :- ${modify}, aggregate(V2,E2,count).`)
+      } else if (props[1] === 'remove' && props[2] === 'count') {
+        rules.push(`${head} :- ${modify}, aggregate(V1,E1,count).`)
+      }
+    }
+  } 
 }
+
+// HAND WRITTEN TRANSFORM EDITS
+rules.push('\n')
+rules.push(`compare(edit_scale,V1,V2) :- comparable(V1,V2), field(V1,E1,F), field(V2,E2,F), log(V1,E1), not log(V2,E2).
+compare(edit_scale,V1,V2) :- comparable(V1,V2), field(V1,E1,F), field(V2,E2,F), not log(V1,E1), log(V2,E2).
+compare(edit_scale,V1,V2) :- comparable(V1,V2), field(V1,E1,F), field(V2,E2,F), zero(V1,E1), not zero(V2,E2).
+compare(edit_scale,V1,V2) :- comparable(V1,V2), field(V1,E1,F), field(V2,E2,F), not zero(V1,E1), zero(V2,E2).
+
+compare(edit_bin,V1,V2) :- comparable(V1,V2), bin(V1,E,_), not bin(V2,E,_).
+compare(edit_bin,V1,V2) :- comparable(V1,V2), not bin(V1,E,_), bin(V2,E,_).
+
+compare(edit_aggregate,V1,V2) :- comparable(V1,V2), aggregate(V1,E,A1), aggregate(V2,E,A2), A1 != A2.
+compare(edit_aggregate,V1,V2) :- comparable(V1,V2), aggregate(V1,E,_), not aggregate(V2,E,_).
+compare(edit_aggregate,V1,V2) :- comparable(V1,V2), not aggregate(V1,E,_), aggregate(V2,E,_).`)
 
 let rulesOutput = `%% FILE GENERATED BY graphscapeToAsp.js, DO NOT MODIFY %%\n`;
 rulesOutput += rules.join('\n');
