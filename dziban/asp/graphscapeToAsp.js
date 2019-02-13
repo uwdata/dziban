@@ -41,8 +41,8 @@ rules.push(`% MARK EDITS`);
 for (let name in markGroup) {
   name = name.toLowerCase();
   const marks = name.split('_');
-  rules.push(`compare(edit_${name},V1,V2) :- comparable(V1,V2), mark(V1,${marks[0]}), mark(V2,${marks[1]}).`);
-  rules.push(`compare(edit_${name},V1,V2) :- comparable(V1,V2), mark(V1,${marks[1]}), mark(V2,${marks[0]}).`)
+  rules.push(`compare(edit_${name},V1,V2,${marks[0]},${marks[1]}) :- comparable(V1,V2), mark(V1,${marks[0]}), mark(V2,${marks[1]}).`);
+  rules.push(`compare(edit_${name},V1,V2,${marks[1]},${marks[0]}) :- comparable(V1,V2), mark(V1,${marks[1]}), mark(V2,${marks[0]}).`)
 }
 
 rules.push('\n');
