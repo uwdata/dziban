@@ -20,8 +20,7 @@ class Chart:
 
     self.fields = list(self._encodings.keys())
 
-    self._name = 'v'
-
+    self._recent_fields = None
     self._anchors = {}
 
     self._mark = None
@@ -64,12 +63,22 @@ class Chart:
     else:
       viewname = Chart.DEFAULT_NAME
 
+    fields = list(fields)
+    if (not fields):
+      fields = self._recent_fields
+    elif (all([x[0] == '+' for x in fields])):
+      fields = [x[1:] for x in fields] + self._recent_fields
+    elif (all([x[0] == '-' for x in fields])):
+      fields = filter(lambda x : x not in [y[1:] for y in fields], self._recent_fields)
+      
+    self._recent_fields = fields
     partial, asp = self._query(fields, anchor, viewname)
 
+    # print('\n'.join(asp))
     self._sol = draco(asp)
 
     if (name is not None):
-      self._anchors[viewname] = anchor_spec(partial, self._sol.props, viewname)
+      self._anchors[viewname] = anchor_spec(partial, self._sol.props[viewname], viewname)
 
     return VegaLite(self._sol.as_vl(viewname), self._data)
 
