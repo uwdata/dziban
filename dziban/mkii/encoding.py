@@ -1,5 +1,3 @@
-from copy import deepcopy
-
 class Encoding(object):
   def __init__(self, field):
     self._field = field
@@ -9,9 +7,6 @@ class Encoding(object):
     self._bin = None
     self._maxbins = None
     self._scale = None
-
-  def clone(self):
-    return deepcopy(self)
 
   def aggregate(self, value):
     self._aggregate = value

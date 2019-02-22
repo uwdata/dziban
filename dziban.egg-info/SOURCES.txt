@@ -1,7 +1,10 @@
 README.md
 dziban/__init__.py
+dziban/base.py
 dziban/chart.py
 dziban/encoding.py
+dziban/field.py
+dziban/util.py
 dziban.egg-info/PKG-INFO
 dziban.egg-info/SOURCES.txt
 dziban.egg-info/dependency_links.txt

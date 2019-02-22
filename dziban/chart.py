@@ -1,4 +1,3 @@
-import json
 from copy import deepcopy
 import re
 
@@ -6,34 +5,25 @@ from draco.js import data2schema, schema2asp
 from draco.run import run as draco
 from vega import VegaLite
 
-from dziban.encoding import Encoding
+from .field import Field
+from .base import Base
 
-class Chart:
+class Chart(Field):
   DEFAULT_NAME = '\"view\"'
+  ANCHOR_NAME = '\"anchor\"'
 
   def __init__(self, data):
-    self._data = data
-
-    json_data = json.loads(data.to_json(orient='records'))
-    self._schema = data2schema(json_data)
-    self._encodings = { field : Encoding(field) for field in self._schema['stats'].keys()}
-
-    self.fields = list(self._encodings.keys())
-
-    self._recent_fields = None
-    self._anchors = {}
-
+    Base.__init__(self, data)
     self._mark = None
+    self._name = Chart.DEFAULT_NAME
 
   def mark(self, value):
-    self._mark = value
-    return self
+    clone = self.clone()
+    clone._mark = value
+    return clone
 
-  def __getitem__(self, key):
-    return self._encodings[key]
-
-  def as_asp(self, viewname, fields):
-    vid = viewname
+  def _get_asp_partial(self):
+    vid = self._name
     asp = ['visualization({0}).'.format(vid)]
     asp += schema2asp(self._schema)
 
@@ -41,77 +31,76 @@ class Chart:
       mark = 'mark({0},{1}).'.format(vid, self._mark)
       asp.append(mark)
 
-    for i, field in enumerate(fields):
+    for i, field in enumerate(self._selectedfields):
       eid = 'e{0}'.format(i)
       asp += self._encodings[field].to_asp(vid, eid)
 
     return asp
 
-  def _query(self, fields, anchor, viewname):
-    partial = self.as_asp(viewname, fields)
-    asp = [] + partial
+  def _get_draco_sol(self):
+    partial = self._get_asp_partial()
+    anchor = self._get_anchor_asp()
 
-    if (anchor is not None):
-      anchor = '\"{0}\"'.format(anchor)
-      asp += self._anchors[anchor]
+    query = partial + anchor
+    sol = draco(query)
+    return sol
 
-    return partial, asp
+  def _get_asp_complete(self):
+    sol = self._get_draco_sol()
+    return sol.props[self._name]
 
-  def see(self, *fields, anchor=None, name=None):
-    if (name is not None):
-      viewname = '\"{0}\"'.format(name)
-    else:
-      viewname = Chart.DEFAULT_NAME
+  def anchor(self, other):
+    clone = self.clone()
 
-    fields = list(fields)
-    if (not fields):
-      fields = self._recent_fields
-    elif (all([x[0] == '+' for x in fields])):
-      fields = [x[1:] for x in fields] + self._recent_fields
-    elif (all([x[0] == '-' for x in fields])):
-      fields = filter(lambda x : x not in [y[1:] for y in fields], self._recent_fields)
-      
-    self._recent_fields = fields
-    partial, asp = self._query(fields, anchor, viewname)
+    anchor_clone = other.clone()
+    anchor_clone._name = Chart.ANCHOR_NAME
 
-    # print('\n'.join(asp))
-    self._sol = draco(asp)
+    clone._anchor = anchor_clone
+    return clone
 
-    if (name is not None):
-      self._anchors[viewname] = anchor_spec(partial, self._sol.props[viewname], viewname)
+  def _get_anchor_asp(self):
+    if (self._anchor is None):
+      return []
+    
+    REGEX = re.compile(r'(\w+)\(([\w\.\"\/]+)(,([\w\"\.]+))?(,([\w\.\"]+))?\)')
 
-    return VegaLite(self._sol.as_vl(viewname), self._data)
+    anchor_complete = self._anchor._get_asp_complete()
+    asp = ['base({0}).'.format(self._anchor._name)] + anchor_complete
 
-def anchor_spec(partial, complete, name):
-  REGEX = re.compile(r'(\w+)\(([\w\.\"\/]+)(,([\w\"\.]+))?(,([\w\.\"]+))?\)')
+    def inc_predicate(dict, pred):
+      (count, params) = dict[pred]
+      dict[pred] = (count + 1, params)
 
-  asp = partial + complete + ['base({0}).'.format(name)]
+    predicates = {}
+    for fact in anchor_complete:
+      [predicate, v, _, __, ___, ____] = REGEX.findall(fact)[0]
+      if (predicate == 'visualization'):
+        vis = v
 
-  def inc_predicate(dict, pred):
-    (count, params) = dict[pred]
-    dict[pred] = (count + 1, params)
+      if (predicate in ('visualization', 'mark')):
+        continue
+      elif (predicate in ('encoding', 'zero', 'log')):
+        if (predicate not in predicates): predicates[predicate] = (0, 1)
+        inc_predicate(predicates, predicate)
+      elif (predicate in ('field', 'type', 'channel', 'bin')):
+        if (predicate not in predicates): predicates[predicate] = (0, 2)
+        inc_predicate(predicates, predicate)
 
-  predicates = {}
-  for fact in complete:
-    [predicate, v, _, __, ___, ____] = REGEX.findall(fact)[0]
-    if (predicate == 'visualization'):
-      vis = v
+    for p in predicates:
+      (count, params) = predicates[p]
+      constraint = ':- not {{ {0}({1}'.format(p,vis)
+      for _ in range(params):
+        constraint += ',_'
+      constraint += ') }} = {0}.'.format(count)
+      asp.append(constraint)
 
-    if (predicate in ('visualization', 'mark')):
-      continue
-    elif (predicate in ('encoding', 'zero', 'log')):
-      if (predicate not in predicates): predicates[predicate] = (0, 1)
-      inc_predicate(predicates, predicate)
-    elif (predicate in ('field', 'type', 'channel', 'bin')):
-      if (predicate not in predicates): predicates[predicate] = (0, 2)
-      inc_predicate(predicates, predicate)
+    return asp
 
-  for p in predicates:
-    (count, params) = predicates[p]
-    constraint = ':- not {{ {0}({1}'.format(p,vis)
-    for _ in range(params):
-      constraint += ',_'
-    constraint += ') }} = {0}.'.format(count)
-    asp.append(constraint)
+  def _get_render(self):
+    sol = self._get_draco_sol()
 
-  return asp
+    vegalite = sol.as_vl(Chart.DEFAULT_NAME)
+    return VegaLite(vegalite, self._data)
+
+  def _repr_mimebundle_(self, include=None, exclude=None):
+    return self._get_render()._repr_mimebundle_(include, exclude)
