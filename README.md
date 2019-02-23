@@ -1,34 +1,21 @@
 # Dziban
 
-**THIS IS A WORK IN PROGRESS**
+Work in progress!
 
-## How it works
+## Usage
 
-There are two ways of using Dziban.
+Check out the [demo Notebook](https://github.com/haldenl/dziban/blob/master/examples/MKIII.ipynb)!
 
-1. Recommendations
-2. Strict Specification
+## The important stuff
 
-### Recommendations
+`base.py` [<>](https://github.com/haldenl/dziban/blob/master/dziban/base.py)
+>base definition for a chart, including initialization
 
-```
-r = Rec().encoding({ x: { field: 'Horsepower' }, y: { field: 'Acceleration' } }).build()
-```
+`chart.py` [<>](https://github.com/haldenl/dziban/blob/master/dziban/chart.py)
+>programming layer, exposed to user
 
-This will perform the following steps.
+`encoding.py` [<>](https://github.com/haldenl/dziban/blob/master/dziban/encoding.py)
+>AST node for encoding objects
 
-1) Generate a Draco specification from the information provided by this partial spec.
-
-```
-encoding(e0).
-:- not field(e0, 'Horsepower').
-
-encoding(e1).
-:- not field(e1, 'Acceleration').
-```
-
-2) Run Draco on the query and converting the result into a VegaLite specification
-
-3) Render the result
-
-### Strict Specification
+`field.py` [<>](https://github.com/haldenl/dziban/blob/master/dziban/field.py)
+>field methods for a chart, exposed to user
