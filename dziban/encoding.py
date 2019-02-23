@@ -1,6 +1,8 @@
 from copy import deepcopy
 
 class Encoding(object):
+  CHANNELS = ['x', 'y', 'row', 'column', 'color', 'size', 'shape', 'text']
+  
   def __init__(self, field):
     self._field = field
 

@@ -5,15 +5,18 @@ from draco.js import data2schema, schema2asp
 from draco.run import run as draco
 from vega import VegaLite
 
-from .field import Field
 from .base import Base
+from .field import Field
+from .channel import Channel
 
-class Chart(Field):
+class Chart(Field, Channel):
   DEFAULT_NAME = '\"view\"'
   ANCHOR_NAME = '\"anchor\"'
 
   def __init__(self, data):
     Base.__init__(self, data)
+    Channel.__init__(self)
+    self._id = 0
     self._mark = None
     self._name = Chart.DEFAULT_NAME
 
@@ -53,7 +56,8 @@ class Chart(Field):
     clone = self.clone()
 
     anchor_clone = other.clone()
-    anchor_clone._name = Chart.ANCHOR_NAME
+    anchor_clone._name = Chart.ANCHOR_NAME[:-1] + str(clone._id) + '\"'
+    clone._id += 1
 
     clone._anchor = anchor_clone
     return clone
@@ -96,10 +100,14 @@ class Chart(Field):
 
     return asp
 
-  def _get_render(self):
+  def _get_vegalite(self):
     sol = self._get_draco_sol()
 
     vegalite = sol.as_vl(Chart.DEFAULT_NAME)
+    return vegalite
+
+  def _get_render(self):
+    vegalite = self._get_vegalite()
     return VegaLite(vegalite, self._data)
 
   def _repr_mimebundle_(self, include=None, exclude=None):
