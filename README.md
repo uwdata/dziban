@@ -2,7 +2,7 @@
 
 Work in progress!
 
-## Usage
+## Demo
 
 Check out the [demo Notebook](https://github.com/haldenl/dziban/blob/master/examples/MKIII.ipynb)!
 
