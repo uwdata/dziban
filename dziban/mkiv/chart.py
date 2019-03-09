@@ -15,6 +15,7 @@ class Chart(Field, Channel):
 
   def __init__(self, data):
     Base.__init__(self, data)
+    Field.__init__(self)
     Channel.__init__(self)
     self._id = 0
     self._mark = None
@@ -34,9 +35,14 @@ class Chart(Field, Channel):
       mark = 'mark({0},{1}).'.format(vid, self._mark)
       asp.append(mark)
 
-    for i, field in enumerate(self._selectedfields):
+    min_encodings = max([len(x) for x in [self._selectedfields, self._selectedchannels]])
+
+    for i in range(min_encodings):
       eid = 'e{0}'.format(i)
-      asp += self._encodings[field].to_asp(vid, eid)
+      asp.append('encoding({0},{1}).'.format(vid, eid))
+
+    for enc in self._encodings:
+      asp += enc.to_asp(vid)
 
     return asp
 

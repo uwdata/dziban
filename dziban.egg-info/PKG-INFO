@@ -8,37 +8,39 @@ Author-email: UNKNOWN
 License: BSD 3-Clause License
 Description: # Dziban
         
-        **THIS IS A WORK IN PROGRESS**
+        Work in progress!
         
-        ## How it works
+        ## Demo
         
-        There are two ways of using Dziban.
+        Check out the [demo Notebook](https://github.com/haldenl/dziban/blob/master/examples/MKIII.ipynb)!
         
-        1. Recommendations
-        2. Strict Specification
+        ## The important stuff
         
-        ### Recommendations
+        `base.py` [<>](https://github.com/haldenl/dziban/blob/master/dziban/base.py)
+        >base definition for a chart, including initialization
         
-        ```
-        r = Rec().encoding({ x: { field: 'Horsepower' }, y: { field: 'Acceleration' } }).build()
-        ```
+        `chart.py` [<>](https://github.com/haldenl/dziban/blob/master/dziban/chart.py)
+        >programming layer, exposed to user
         
-        This will perform the following steps.
+        `encoding.py` [<>](https://github.com/haldenl/dziban/blob/master/dziban/encoding.py)
+        >AST node for encoding objects
         
-        1) Generate a Draco specification from the information provided by this partial spec.
+        `field.py` [<>](https://github.com/haldenl/dziban/blob/master/dziban/field.py)
+        >field methods for a chart, exposed to user
         
-        ```
-        encoding(e0).
-        :- not field(e0, 'Horsepower').
+        `graphscape2asp.js` [<>](https://github.com/haldenl/dziban/blob/master/dziban/asp/graphscapeToAsp.js)
+        >script for translating Graphscape definitions and weights into ASP (to be placed into Draco). See below.
         
-        encoding(e1).
-        :- not field(e1, 'Acceleration').
-        ```
+        In addition, Dziban uses a modified version of Draco, which supports multi-view and Graphscape's transition reasoning.
+        This can be found on [this branch](https://github.com/uwdata/draco/tree/multi-vis). There are changes to the original Draco scattered about. Noteably:
         
-        2) Run Draco on the query and converting the result into a VegaLite specification
+        `compare.lp` [<>](https://github.com/uwdata/draco/blob/multi-vis/asp/compare.lp)
+        >transition definitions for Graphscape
         
-        3) Render the result
+        `compare_weights.lp` [<>](https://github.com/uwdata/draco/blob/multi-vis/asp/compare_weights.lp)
+        >weights for these transitions
         
-        ### Strict Specification
+        `The whole system`
+        >has been modified to allow for multiview reasoning (many other files, e.g. `define.lp`, `soft.lp`, `optimize.lp`, `run.py`, `asp2vl`, and more and more).
         
 Platform: UNKNOWN
