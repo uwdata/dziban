@@ -2,12 +2,14 @@ from copy import deepcopy
 import re
 
 from draco.js import data2schema, schema2asp
-from draco.run import run as draco
+from draco.run import run as draco, DRACO_LP
 from vega import VegaLite
+from scipy.stats import zscore
 
 from .base import Base
 from .field import Field
 from .channel import Channel
+from .util import filter_sols, foreach, construct_graph
 
 class Chart(Field, Channel):
   DEFAULT_NAME = '\"view\"'
@@ -51,8 +53,34 @@ class Chart(Field, Channel):
     anchor = self._get_anchor_asp()
 
     query = partial + anchor
-    sol = draco(query)
-    return sol
+
+    if (anchor):
+      files = list(filter(lambda file : file != 'optimize.lp', DRACO_LP))
+      opt_draco_files = files + ['optimize_draco.lp']
+      best_draco = draco(query, files=opt_draco_files, topk=True, k=50, silence_warnings=True)
+
+      opt_graphscape_files = files + ['optimize_graphscape.lp']
+      best_graphscape = draco(query, files=opt_graphscape_files, topk=True, k=50, silence_warnings=True)
+
+      sol = self._find_best(best_draco + best_graphscape)
+      return sol
+    else:
+      sol = draco(query)
+      return sol
+
+  def _find_best(self, sols):
+    good = filter_sols(sols)
+    
+    d = [v.d for v in good]
+    g = [v.g for v in good]
+
+    dz = zscore(d)
+    gz = zscore(g)
+
+    combined = [(v, dz[i] + gz[i]) for i,v in enumerate(good)]
+    best_v, _ = min(combined, key = lambda x : x[1])
+
+    return best_v
 
   def _get_asp_complete(self):
     sol = self._get_draco_sol()
@@ -87,14 +115,25 @@ class Chart(Field, Channel):
       if (predicate == 'visualization'):
         vis = v
 
-      if (predicate in ('visualization', 'mark')):
+      if (predicate in ('visualization')):
         continue
-      elif (predicate in ('encoding', 'zero', 'log')):
+      elif (predicate in ('encoding', 'zero', 'log', 'mark')):
         if (predicate not in predicates): predicates[predicate] = (0, 1)
         inc_predicate(predicates, predicate)
-      elif (predicate in ('field', 'type', 'channel', 'bin')):
+      elif (predicate in ('field', 'type', 'channel', 'bin', 'aggregate')):
         if (predicate not in predicates): predicates[predicate] = (0, 2)
         inc_predicate(predicates, predicate)
+
+    one_arg_p = ['encoding', 'zero', 'log', 'mark', 'stack']
+    two_arg_p = ['channel', 'type', 'field', 'aggregate', 'bin']
+    
+    for p in one_arg_p:
+      if (p not in predicates):
+        predicates[p] = (0, 1)
+
+    for p in two_arg_p:
+      if (p not in predicates):
+        predicates[p] = (0, 2)
 
     for p in predicates:
       (count, params) = predicates[p]
