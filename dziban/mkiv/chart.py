@@ -14,6 +14,7 @@ from .util import filter_sols, foreach, construct_graph
 class Chart(Field, Channel):
   DEFAULT_NAME = '\"view\"'
   ANCHOR_NAME = '\"anchor\"'
+  K = 20
 
   def __init__(self, data):
     Base.__init__(self, data)
@@ -49,27 +50,32 @@ class Chart(Field, Channel):
     return asp
 
   def _get_draco_sol(self):
+    if (self._anchor):
+      topk = self._get_topk_from_anchor()
+      return topk[0][0]
+    else:
+      query = self._get_full_query()
+      sol = draco(query)
+      return sol
+
+  def _get_full_query(self):
     partial = self._get_asp_partial()
     anchor = self._get_anchor_asp()
 
     query = partial + anchor
 
-    if (anchor):
-      files = list(filter(lambda file : file != 'optimize.lp', DRACO_LP))
-      opt_draco_files = files + ['optimize_draco.lp']
-      best_draco = draco(query, files=opt_draco_files, topk=True, k=50, silence_warnings=True)
+    return query
 
-      opt_graphscape_files = files + ['optimize_graphscape.lp']
-      best_graphscape = draco(query, files=opt_graphscape_files, topk=True, k=50, silence_warnings=True)
+  def _get_topk_from_anchor(self):
+    query = self._get_full_query()
+    files = list(filter(lambda file : file != 'optimize.lp', DRACO_LP))
+    opt_draco_files = files + ['optimize_draco.lp']
+    best_draco = draco(query, files=opt_draco_files, topk=True, k=Chart.K, silence_warnings=True)
 
-      sol = self._find_best(best_draco + best_graphscape)
-      return sol
-    else:
-      sol = draco(query)
-      return sol
+    opt_graphscape_files = files + ['optimize_graphscape.lp']
+    best_graphscape = draco(query, files=opt_graphscape_files, topk=True, k=Chart.K, silence_warnings=True)
 
-  def _find_best(self, sols):
-    good = filter_sols(sols)
+    good = filter_sols(best_draco + best_draco)
     
     d = [v.d for v in good]
     g = [v.g for v in good]
@@ -78,9 +84,9 @@ class Chart(Field, Channel):
     gz = zscore(g)
 
     combined = [(v, dz[i] + gz[i]) for i,v in enumerate(good)]
-    best_v, _ = min(combined, key = lambda x : x[1])
+    combined.sort(key = lambda x : x[1])
 
-    return best_v
+    return combined
 
   def _get_asp_complete(self):
     sol = self._get_draco_sol()
