@@ -10,6 +10,23 @@ Here's a quick peek.
 
 ![img](https://github.com/haldenl/dziban/blob/master/examples/example.png)
 
+## Installation
+
+1. Clone the `multi-vis` branch of `draco`, found [here](https://github.com/uwdata/draco/tree/multi-vis). And follow the installation instructions.
+
+2. Install Dziban: `pip install -e .`.
+
+3. Start up a notebook: `jupyter notebook`.
+
+4. Import Dziban and perhaps a dataset from `vega_datasets`.
+
+```
+from dziban.mkiv import Chart
+from vega_datasets import data
+```
+
+Follow the demo for usage examples.
+
 ## Prototype Status
 
 Current prototype: MKIV.
