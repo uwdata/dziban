@@ -14,11 +14,13 @@ Here's a quick peek.
 
 1. Clone the `multi-vis` branch of `draco`, found [here](https://github.com/uwdata/draco/tree/multi-vis). And follow the installation instructions.
 
-2. Install Dziban: `pip install -e .`.
+2. Install dependencies: `pip install -r requirements.txt`.
 
-3. Start up a notebook: `jupyter notebook`.
+3. Install Dziban: `pip install -e .`.
 
-4. Import Dziban and perhaps a dataset from `vega_datasets`.
+4. Start up a notebook: `jupyter notebook`.
+
+5. Import Dziban and perhaps a dataset from `vega_datasets`.
 
 ```
 from dziban.mkiv import Chart
