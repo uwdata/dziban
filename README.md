@@ -1,23 +1,23 @@
 # Dziban
 
-Work in progress!
+WIP
 
 ## Demo
 
-Check out the [demo Notebook](https://github.com/haldenl/dziban/blob/master/examples/MKIII.ipynb)!
+Check out the [demo Notebook](https://github.com/haldenl/dziban/blob/master/examples/MKIV.ipynb).
 
 ## The important stuff
 
-`base.py` [<>](https://github.com/haldenl/dziban/blob/master/dziban/base.py)
+`base.py` [<>](https://github.com/haldenl/dziban/blob/master/dziban/mkiv/base.py)
 >base definition for a chart, including initialization
 
-`chart.py` [<>](https://github.com/haldenl/dziban/blob/master/dziban/chart.py)
+`chart.py` [<>](https://github.com/haldenl/dziban/blob/master/dziban/mkiv/chart.py)
 >programming layer, exposed to user
 
-`encoding.py` [<>](https://github.com/haldenl/dziban/blob/master/dziban/encoding.py)
+`encoding.py` [<>](https://github.com/haldenl/dziban/blob/master/dziban/mkiv/encoding.py)
 >AST node for encoding objects
 
-`field.py` [<>](https://github.com/haldenl/dziban/blob/master/dziban/field.py)
+`field.py` [<>](https://github.com/haldenl/dziban/blob/master/dziban/mkiv/field.py)
 >field methods for a chart, exposed to user
 
 `graphscape2asp.js` [<>](https://github.com/haldenl/dziban/blob/master/dziban/asp/graphscapeToAsp.js)
@@ -33,4 +33,4 @@ This can be found on [this branch](https://github.com/uwdata/draco/tree/multi-vi
 >weights for these transitions
 
 `The whole system`
->has been modified to allow for multiview reasoning (many other files, e.g. `define.lp`, `soft.lp`, `optimize.lp`, `run.py`, `asp2vl`, and more and more).
+>has been modified to allow for multiview reasoning (many other files, e.g. `define.lp`, `soft.lp`, `optimize.lp`, `run.py`, `asp2vl`, `optimize_draco.lp`, `optimize_graphscape.lp`, and more and more).
