@@ -92,7 +92,7 @@ class Chart(Field, Channel):
     sol = self._get_draco_sol()
     return sol.props[self._name]
 
-  def anchor(self, other):
+  def anchor_on(self, other):
     clone = self.clone()
 
     anchor_clone = other.clone()
