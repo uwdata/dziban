@@ -6,6 +6,10 @@ WIP
 
 Check out the [demo Notebook](https://github.com/haldenl/dziban/blob/master/examples/MKIV.ipynb).
 
+Here's a quick peek.
+
+![img](https://github.com/haldenl/dziban/blob/master/examples/example.png)
+
 ## Prototype Status
 
 Current prototype: MKIV.
