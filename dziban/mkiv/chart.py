@@ -29,6 +29,9 @@ class Chart(Field, Channel):
     clone._mark = value
     return clone
 
+  def get_fields(self):
+    return self._fields
+
   def _get_asp_partial(self):
     vid = self._name
     asp = ['visualization({0}).'.format(vid)]
