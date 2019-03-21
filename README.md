@@ -6,6 +6,10 @@ WIP
 
 Check out the [demo Notebook](https://github.com/haldenl/dziban/blob/master/examples/MKIV.ipynb).
 
+## Prototype Status
+
+Current prototype: MKIV.
+
 ## The important stuff
 
 `base.py` [<>](https://github.com/haldenl/dziban/blob/master/dziban/mkiv/base.py)
