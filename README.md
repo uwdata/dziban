@@ -2,9 +2,9 @@
 
 WIP
 
-## Demo
+## Tutorial & Demo
 
-Check out the [demo Notebook](https://github.com/haldenl/dziban/blob/master/examples/MKIV.ipynb).
+Check out the [Notebook](https://github.com/haldenl/dziban/blob/master/examples/MKIV.ipynb).
 
 Here's a quick peek.
 
