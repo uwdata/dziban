@@ -2,6 +2,10 @@
 
 WIP
 
+## Prototype Status
+
+Current prototype: MKIV.
+
 ## Tutorial & Demo
 
 Check out the [Notebook](https://github.com/haldenl/dziban/blob/master/examples/MKIV.ipynb).
@@ -29,9 +33,6 @@ from vega_datasets import data
 
 Follow the demo for usage examples.
 
-## Prototype Status
-
-Current prototype: MKIV.
 
 ## The important stuff
 
