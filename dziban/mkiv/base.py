@@ -14,6 +14,17 @@ class Base:
     self._fields = list(self._schema['stats'].keys())
     self._anchor = None
 
+  def data(self, data):
+    clone = self.clone()
+
+    clone._data = data
+
+    json_data = json_parse(data.to_json(orient='records'))
+    clone._schema = data2schema(json_data)
+
+    clone._fields = list(self._schema['stats'].keys()) 
+    return clone
+
   def clone(self):
     return deepcopy(self)
 

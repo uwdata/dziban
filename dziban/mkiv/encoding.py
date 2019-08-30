@@ -12,6 +12,7 @@ class Encoding(object):
       self._condition = (self._condition[0], '\"{0}\"'.format(self._condition[1]))
 
     self._field = None
+    self._ftype = None
     self._aggregate = None
     self._channel = None
     self._bin = None
@@ -20,6 +21,10 @@ class Encoding(object):
 
   def clone(self):
     return deepcopy(self)
+
+  def ftype(self, value):
+    self._ftype = value
+    return self
 
   def field(self, value):
     self._field = value
@@ -63,6 +68,10 @@ class Encoding(object):
     if (self._field is not None):
       field = template.format('field', vid, eid, '\"{0}\"'.format(self._field))
       facts.append(field)
+
+    if (self._ftype is not None):
+      ftype = template.format('type', vid, eid, self._ftype)
+      facts.append(ftype)
 
     if (self._aggregate is not None):
         aggregate = template.format('aggregate', vid, eid, self._aggregate)

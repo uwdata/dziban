@@ -12,6 +12,8 @@ class Channel(Base):
 
         enc = Encoding(channel=c)
 
+        clone._selectedchannels.add(c)
+
         for k, v in props.items():
           getattr(enc, k)(v)
 
