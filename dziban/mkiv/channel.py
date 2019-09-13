@@ -10,6 +10,9 @@ class Channel(Base):
       def f(self, c=c, **props):
         clone = self.clone()
 
+        if ('field' in props):
+          clone._selectedfields.add(props['field'])
+
         enc = Encoding(channel=c)
 
         clone._selectedchannels.add(c)
@@ -28,7 +31,11 @@ class Channel(Base):
     **props,
   ):
     clone = self.clone()
-    self._selectedchannels.update(channels)
+
+    if ('field' in props):
+      clone._selectedfields.add(props['field'])
+
+    clone._selectedchannels.update(channels)
 
     clone._update_encodings('channel', channels, props)
     

@@ -32,6 +32,16 @@ class Chart(Field, Channel):
   def get_fields(self):
     return self._fields
 
+  def is_satisfiable(self):
+    try:
+      self._get_draco_sol()
+      return True
+    except:
+      return False
+
+  def __sub__(self, other):
+    return set(self._get_graphscape_list()) - set(other._get_graphscape_list())
+
   def _get_asp_partial(self):
     vid = self._name
     asp = ['visualization({0}).'.format(vid)]
@@ -73,27 +83,54 @@ class Chart(Field, Channel):
     query = self._get_full_query()
     files = list(filter(lambda file : file != 'optimize.lp', DRACO_LP))
     opt_draco_files = files + ['optimize_draco.lp']
+
+    # print('\n'.join(query))
+    print('\n'.join(opt_draco_files))
     best_draco = draco(query, files=opt_draco_files, topk=True, k=Chart.K, silence_warnings=True)
 
-    opt_graphscape_files = files + ['optimize_graphscape.lp']
-    best_graphscape = draco(query, files=opt_graphscape_files, topk=True, k=Chart.K, silence_warnings=True)
+    # opt_graphscape_files = files + ['optimize_graphscape.lp']
+    # best_graphscape = draco(query, files=opt_graphscape_files, topk=True, k=Chart.K, silence_warnings=True)
 
-    good = filter_sols(best_draco + best_draco)
+    good = filter_sols(best_draco)
     
+    if (len(good) == 1):
+      return [(good[0],0)]
+
     d = [v.d for v in good]
     g = [v.g for v in good]
 
-    dz = zscore(d)
-    gz = zscore(g)
+    dz = None
+    gz = None
+    if (len(set(d)) == 1):
+      dz = [0 for _ in d]
+    else:
+      dz = zscore(d)
 
-    combined = [(v, dz[i] + gz[i]) for i,v in enumerate(good)]
-    combined.sort(key = lambda x : x[1])
+    if (len(set(g)) == 1):
+      gz = [0 for _ in g]
+    else:
+      gz = zscore(g)
+
+    combined = [(v, dz[i] + gz[i], d[i]) for i,v in enumerate(good)]
+    combined.sort(key = lambda x : (x[1], x[2]))
 
     return combined
 
   def _get_asp_complete(self):
     sol = self._get_draco_sol()
     return sol.props[self._name]
+
+  def _get_violations(self):
+    sol = self._get_draco_sol()
+    return sol.violations
+
+  def _get_graphscape_list(self):
+    sol = self._get_draco_sol()
+    return sol.graphscape_list
+
+  def _get_facts(self):
+    sol = self._get_draco_sol()
+    return sol.draco_list
 
   def anchor_on(self, other):
     clone = self.clone()
@@ -126,7 +163,7 @@ class Chart(Field, Channel):
 
       if (predicate in ('visualization')):
         continue
-      elif (predicate in ('encoding', 'zero', 'log', 'mark')):
+      elif (predicate in ('encoding', 'zero', 'log', 'mark', 'stack')):
         if (predicate not in predicates): predicates[predicate] = (0, 1)
         inc_predicate(predicates, predicate)
       elif (predicate in ('field', 'type', 'channel', 'bin', 'aggregate')):
@@ -144,13 +181,18 @@ class Chart(Field, Channel):
       if (p not in predicates):
         predicates[p] = (0, 2)
 
-    for p in predicates:
-      (count, params) = predicates[p]
-      constraint = ':- not {{ {0}({1}'.format(p,vis)
-      for _ in range(params):
-        constraint += ',_'
-      constraint += ') }} = {0}.'.format(count)
-      asp.append(constraint)
+    # for p in predicates:
+    #   if p in ['bin']:
+    #     continue
+    #   (count, params) = predicates[p]
+    #   constraint = ':- not {{ {0}({1}'.format(p,vis)
+    #   for _ in range(params):
+    #     constraint += ',_'
+    #   constraint += ') }} = {0}.'.format(count)
+    #   asp.append(constraint)
+
+    # to_remove = ':- not { encoding("anchor0",_) } = 1.'
+    # asp.remove(to_remove)
 
     return asp
 

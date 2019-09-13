@@ -57,23 +57,26 @@ for (let name in encodingGroup) {
 
   const head = `compare(edit_${name},V1,V2)`;
   if (action === 'add') {
-    const head = `compare(edit_${name},V1,V2,E2,F2)`;
-    const add = `comparable(V1,V2), channel(V2,E2,${props[0]}), field(V2,E2,F2), not channel(V1,_,${props[0]}), not field(V1,_,F2)`;
     if (props.length === 1) {
+      const head = `compare(edit_${name},V1,V2,E2,F2)`;
+      const add = `comparable(V1,V2), channel(V2,E2,${props[0]}), field(V2,E2,F2), not channel(V1,_,${props[0]})`;
       const duplicateCount = `${name}_count`;
-      const duplicateRule = `not compare(edit_${duplicateCount},V1,V2,E2,F2)`;  // don't double dip count case
+      const duplicateRule = `not compare(edit_${duplicateCount},V1,V2,E2,count)`;  // don't double dip count case
       rules.push(`${head} :- ${duplicateRule}, ${add}.`)
     } else if (props.length === 2) {
       if (props[1] === 'count') {
-        rules.push(`${head} :- ${add}, aggregate(V2,E2,count).`)
+        const head = `compare(edit_${name},V1,V2,E2,count)`;
+        const add = `comparable(V1,V2), channel(V2,E2,${props[0]}), aggregate(V2,E2,count), not channel(V1,_,${props[0]})`;
+
+        rules.push(`${head} :- ${add}.`)
       }
     }
   } else if (action === 'remove') {
     const head = `compare(edit_${name},V1,V2,E1,F1)`;
-    const remove = `comparable(V1,V2), channel(V1,E1,${props[0]}), field(V1,E1,F1), not channel(V2,_,${props[0]}), not field(V2,_,F1)`
+    const remove = `comparable(V1,V2), channel(V1,E1,${props[0]}), field(V1,E1,F1), not channel(V2,_,${props[0]})`
     if (props.length === 1) {
       const duplicateCount = `${name}_count`;
-      const duplicateRule = `not compare(edit_${duplicateCount},V1,V2,E1,F1)`;  // don't double dip count case
+      const duplicateRule = `not compare(edit_${duplicateCount},V1,V2,E1,count)`;  // don't double dip count case
       rules.push(`${head} :- ${duplicateRule}, ${remove}.`)
     } else if (props.length === 2) {
       if (props[1] === 'count') {
