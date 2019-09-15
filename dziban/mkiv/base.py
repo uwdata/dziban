@@ -13,6 +13,8 @@ class Base:
 
     self._fields = list(self._schema['stats'].keys())
     self._anchor = None
+    self._sol = None
+    self._solved = False
 
   def data(self, data):
     clone = self.clone()
@@ -26,7 +28,18 @@ class Base:
     return clone
 
   def clone(self):
-    return deepcopy(self)
+    clone = deepcopy(self)
+    clone._sol = None
+    clone._solved = False
+
+    return clone
+
+  def _set_sol(self, sol):
+    clone = self.clone()
+    clone._sol = sol
+    clone._solved = True
+
+    return clone
 
   def _update_encodings(self, key, values, props):
     if ('aggregate', 'count') in props.items():

@@ -11,6 +11,12 @@ def filter_sols(sols):
 
   return good
 
+def normalize(arr):
+  hi = max(arr)
+  lo = min(arr)
+
+  return [(n - lo) / (hi - lo) for n in arr]
+
 def construct_graph(sols):
   sols.sort(key = lambda v : len(v.graphscape_list))
 
