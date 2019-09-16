@@ -15,9 +15,10 @@ from .util import filter_sols, foreach, construct_graph, normalize
 class Chart(Field, Channel):
   DEFAULT_NAME = '\"view\"'
   ANCHOR_NAME = '\"anchor\"'
+  OPT_DRACO_FILES = list(filter(lambda file : file != 'optimize.lp', DRACO_LP)) + ['optimize.lp']
   OPT_GRAPHSCAPE_FILES = list(filter(lambda file : file != 'optimize.lp', DRACO_LP)) + ['optimize_graphscape.lp']
-  OPT_DRACO_FILES = list(filter(lambda file : file != 'optimize.lp', DRACO_LP)) + ['optimize_draco.lp']
-  K = 20
+  OPT_DRACO_THEN_GRAPHSCAPE_FILES = list(filter(lambda file : file != 'optimize.lp', DRACO_LP)) + ['optimize_draco.lp']
+  K = 40
 
   def __init__(self, data):
     Base.__init__(self, data)
@@ -37,6 +38,23 @@ class Chart(Field, Channel):
 
   def is_satisfiable(self):
     return self._get_draco_sol() is not None
+
+  def _get_graphscape_score(self, anchor=None):
+    if (anchor is not None):
+      query = self.anchor_on(anchor)._get_anchor_asp() + self._get_asp_complete() + schema2asp(self._schema)
+      
+      files = list(filter(lambda file : file != 'generate.lp', Chart.OPT_GRAPHSCAPE_FILES))
+
+      result = draco(query, files=files, silence_warnings=True)
+      return result.g
+    else:
+      if (self._anchor is None):
+        raise Exception("Must provide anchor for non-anchored chart")
+
+      return self._get_draco_sol().g
+
+  def _get_draco_score(self):
+    return self._get_draco_sol().d
 
   def __sub__(self, other):
     query = self.anchor_on(other)._get_anchor_asp() + self._get_asp_complete()
@@ -97,16 +115,16 @@ class Chart(Field, Channel):
   def _get_draco_rank(self):
     return self._get_rank('draco')
 
-  def _get_graphscape_rank(self, anchor_for_cold=None):
-    return self._get_rank('graphscape', anchor_for_cold)
+  def _get_graphscape_rank(self, anchor=None):  # anchor optional for already anchored charts
+    return self._get_rank('graphscape', anchor=anchor)
 
-  def _get_rank(self, function, anchor_for_cold=None):
+  def _get_rank(self, function, anchor=None):
     opt = None
 
     if (function == 'graphscape'):
       opt = Chart.OPT_GRAPHSCAPE_FILES
     elif (function == 'draco'):
-      opt = Chart.OPT_DRACO_FILES
+      opt = Chart.OPT_DRACO_THEN_GRAPHSCAPE_FILES
     else:
       raise Exception("invalid function (graphscape or draco)")
 
@@ -116,29 +134,38 @@ class Chart(Field, Channel):
     query = None
 
     if (function == 'graphscape'):
-      if (anchor_for_cold):
-        query = self.clone().anchor_on(anchor_for_cold)._get_full_query()
+      if (anchor):
+        query = self.clone().anchor_on(anchor)._get_full_query()
       else:
         if self._anchor is None:
-          raise Exception("cold recommendation requires an anchor_for_cold")
+          raise Exception("cold recommendation requires an anchor")
         query = self._get_full_query()
     elif (function == 'draco'):
       query = self._get_asp_partial()
 
     topk = draco(query, files=opt, topk=True, k=Chart.K, silence_warnings=True)
 
+    actual_k = len(topk)  # if k is unsatisfiable, draco will return < k
+
     topk_vegalite = { json.dumps(c.as_vl(Chart.DEFAULT_NAME), sort_keys=True):rank for rank, c in enumerate(topk) }
 
     if (best_vegalite in topk_vegalite):
-      return topk_vegalite[best_vegalite]
+      return {
+        'rank': topk_vegalite[best_vegalite],
+        'of': actual_k
+      }
     else:
-      return None
+      return {
+        'rank': None,
+        'of': Chart.K
+      }
 
   def _get_topk_from_anchor(self):
     query = self._get_full_query()
-    best = draco(query, files=Chart.OPT_GRAPHSCAPE_FILES, topk=True, k=Chart.K, silence_warnings=True)
+    best_graphscape = draco(query, files=Chart.OPT_GRAPHSCAPE_FILES, topk=True, k=Chart.K, silence_warnings=True)
+    best_draco = draco(query, files=Chart.OPT_DRACO_THEN_GRAPHSCAPE_FILES, topk=True, k=Chart.K, silence_warnings=True)
 
-    good = filter_sols(best)
+    good = filter_sols(best_graphscape, best_draco, Chart.DEFAULT_NAME)
     
     if (len(good) == 1):
       return [(good[0],0)]
@@ -153,14 +180,14 @@ class Chart(Field, Channel):
     if (len(set(d)) == 1):
       dz = [0 for _ in d]
     else:
-      # dz = zscore(d)
-      dz = normalize(d)
+      dz = zscore(d)
+      # dz = normalize(d)
 
     if (len(set(g)) == 1):
       gz = [0 for _ in g]
     else:
-      # gz = zscore(g)
-      gz = normalize(g)
+      gz = zscore(g)
+      # gz = normalize(g)
 
     # print(dz)
     # print(gz)

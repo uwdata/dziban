@@ -1,15 +1,25 @@
+import json
+
 def foreach(iterable, fn):
   for v in iterable:
     fn(v)
 
-def filter_sols(sols):
-  good = []
-  for v1 in sols:
-    better = [v1.g <= v2.g or v1.d <= v2.d for v2 in sols]
-    accept = all(better)
-    if (accept): good.append(v1)
+def filter_sols(best_draco, best_graphscape, name):
+  best_draco_vl = set(json.dumps(c.as_vl(name), sort_keys=True) for c in best_draco)
 
-  return good
+  sols = list(filter(lambda c: json.dumps(c.as_vl(name), sort_keys=True) in best_draco_vl, best_graphscape))
+
+  if (len(sols) > 0):
+    return sols
+  else:
+    return best_draco
+  # good = []
+  # for v1 in sols:
+  #   better = [v1.g <= v2.g or v1.d <= v2.d for v2 in sols]
+  #   accept = all(better)
+  #   if (accept): good.append(v1)
+
+  # return good
 
 def normalize(arr):
   hi = max(arr)
