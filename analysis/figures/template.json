@@ -8,10 +8,14 @@
       "title": "Dimensions (of Prior)"
     }
   },
+  "title": {
+    "text": "Gain in Graphscape Rank (excluding identical cases)",
+    "anchor": "middle"
+  },
   "background": "white",
   "transform": [
     {
-      "filter": "datum.prior_dimensions !== null"
+      "filter": "datum.prior_dimensions !== null && !(datum.delta_dr === 0 && datum.delta_gr === 0)"
     },
     {
       "calculate": "-datum.delta_dr",
@@ -36,7 +40,7 @@
         },
         "encoding": {
           "x": {
-            "field": "delta_gr",
+            "field": "neg_delta_dr",
             "type": "quantitative",
             "aggregate": "mean"
           }
@@ -49,9 +53,15 @@
         },
         "encoding": {
           "x": {
-            "field": "delta_gr",
+            "field": "neg_delta_dr",
             "type": "quantitative",
-            "title": "Gain in Graphscape Rank"
+            "scale": {
+              "domain": [
+                -5,
+                40
+              ]
+            },
+            "title": "Loss in Graphscape Rank"
           }
         }
       }
