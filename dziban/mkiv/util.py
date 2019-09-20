@@ -5,14 +5,14 @@ def foreach(iterable, fn):
     fn(v)
 
 def filter_sols(best_draco, best_graphscape, name):
-  best_draco_vl = set(json.dumps(c.props[name]) for c in best_draco)
+  best_draco_specs = set(json.dumps(sorted(c.props[name])) for c in best_draco)
 
-  sols = list(filter(lambda c: json.dumps(c.props[name]) in best_draco_vl, best_graphscape))
+  sols = list(filter(lambda c: json.dumps(sorted(c.props[name])) in best_draco_specs, best_graphscape))
 
   if (len(sols) > 0):
     return sols
   else:
-    print('none')
+    # print('none')
     return best_draco
   # good = []
   # for v1 in sols:

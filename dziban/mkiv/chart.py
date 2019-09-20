@@ -134,7 +134,7 @@ class Chart(Field, Channel):
   #   return self._get_rank('graphscape', anchor=anchor)
 
   def _get_stats(self, anchor=None):
-    evalk = Chart.K
+    evalk = 1000
 
     own_sol = None
     own_draco_score = None
@@ -142,18 +142,19 @@ class Chart(Field, Channel):
 
     own_spec = None
 
-    draco_query = None
+    query = None
     if (anchor):
-      draco_query = self.clone().anchor_on(anchor)._get_full_query()
+      query = self.clone().anchor_on(anchor)._get_full_query()
     else:
       if self._anchor is None:
         raise Exception("cold recommendation requires anchor")
-      draco_query = self._get_full_query()
+      query = self._get_full_query()
 
-    topk_draco = draco(draco_query, files=Chart.OPT_DRACO_THEN_GRAPHSCAPE_FILES, topk=True, k=evalk, silence_warnings=True)
+    topk_draco = draco(query, files=Chart.OPT_DRACO_THEN_GRAPHSCAPE_FILES, topk=True, k=evalk, silence_warnings=True)
 
     if (anchor):
-      own_sol = topk_draco[0]
+      top = draco(query, files=Chart.OPT_DRACO_THEN_GRAPHSCAPE_FILES, topk=True, k=Chart.K, silence_warnings=True)
+      own_sol = top[0]
     else:
       if self._anchor is None:
         raise Exception("cold recommendation requires anchor")
@@ -161,7 +162,7 @@ class Chart(Field, Channel):
 
     own_draco_score = own_sol.d
     own_graphscape_score = own_sol.g
-    own_spec = json.dumps(own_sol.props[Chart.DEFAULT_NAME])
+    own_spec = json.dumps(sorted(own_sol.props[Chart.DEFAULT_NAME]))
 
     actual_k_draco = len(topk_draco)
     
@@ -177,12 +178,12 @@ class Chart(Field, Channel):
     else:
       norm_draco_score = (own_draco_score - min_draco_score) / (max_draco_score - min_draco_score)
 
-    topk_draco_specs = { json.dumps(c.props[Chart.DEFAULT_NAME]): rank for rank, c in enumerate(topk_draco) }
+    topk_draco_specs = { json.dumps(sorted(c.props[Chart.DEFAULT_NAME])): rank for rank, c in enumerate(topk_draco) }
     for rank,c in enumerate(topk_draco):
       if (rank > 0):
         prev = topk_draco[rank - 1]
         if prev.d == c.d:
-          topk_draco_specs[json.dumps(c.props[Chart.DEFAULT_NAME])] = topk_draco_specs[json.dumps(prev.props[Chart.DEFAULT_NAME])]
+          topk_draco_specs[json.dumps(sorted(c.props[Chart.DEFAULT_NAME]))] = topk_draco_specs[json.dumps(sorted(prev.props[Chart.DEFAULT_NAME]))]
 
 
     draco_rank = None
@@ -197,15 +198,15 @@ class Chart(Field, Channel):
 
 
     ## Graphscape
-    graphscape_query = None
-    if (anchor):
-      graphscape_query = self.clone().anchor_on(anchor)._get_full_query()
-    else:
-      if self._anchor is None:
-        raise Exception("cold recommendation requires anchor")
-      graphscape_query = self._get_full_query()
+    # graphscape_query = None
+    # if (anchor):
+    #   graphscape_query = self.clone().anchor_on(anchor)._get_full_query()
+    # else:
+    #   if self._anchor is None:
+    #     raise Exception("cold recommendation requires anchor")
+    #   graphscape_query = self._get_full_query()
     
-    topk_graphscape = draco(graphscape_query, files=Chart.OPT_GRAPHSCAPE_FILES, topk=True, k=evalk, silence_warnings=True)
+    topk_graphscape = draco(query, files=Chart.OPT_GRAPHSCAPE_FILES, topk=True, k=evalk, silence_warnings=True)
     actual_k_graphscape = len(topk_graphscape)
 
     topk_graphscape_scores = [x.d for x in topk_graphscape]
@@ -221,7 +222,7 @@ class Chart(Field, Channel):
     else:
       norm_graphscape_score = (own_graphscape_score - min_graphscape_score) / (max_graphscape_score - min_graphscape_score)
 
-    topk_graphscape_specs = { json.dumps(c.props[Chart.DEFAULT_NAME]): rank for rank, c in enumerate(topk_graphscape)}
+    topk_graphscape_specs = { json.dumps(sorted(c.props[Chart.DEFAULT_NAME])): rank for rank, c in enumerate(topk_graphscape)}
     graphscape_rank = None
     graphscape_of = None
 
@@ -229,7 +230,7 @@ class Chart(Field, Channel):
       if (rank > 0):
         prev = topk_graphscape[rank - 1]
         if prev.g == c.g:
-          topk_graphscape_specs[json.dumps(c.props[Chart.DEFAULT_NAME])] = topk_graphscape_specs[json.dumps(prev.props[Chart.DEFAULT_NAME])]
+          topk_graphscape_specs[json.dumps(sorted(c.props[Chart.DEFAULT_NAME]))] = topk_graphscape_specs[json.dumps(sorted(prev.props[Chart.DEFAULT_NAME]))]
 
 
     if (own_spec in topk_graphscape_specs):
@@ -298,11 +299,6 @@ class Chart(Field, Channel):
     best_graphscape = draco(graphscape_query, files=Chart.OPT_GRAPHSCAPE_FILES, topk=True, k=Chart.K, silence_warnings=True)
     best_draco = draco(draco_query, files=Chart.OPT_DRACO_THEN_GRAPHSCAPE_FILES, topk=True, k=Chart.K, silence_warnings=True)
 
-    # print([c.d for c in best_draco])
-
-    # return [(d,0) for d in best_draco]
-
-    # good = best_draco + best_graphscape
     good = filter_sols(best_draco, best_graphscape, self._name)
     
     if (len(good) == 1):
@@ -311,24 +307,17 @@ class Chart(Field, Channel):
     d = [v.d for v in good]
     g = [v.g for v in good]
 
-    # print(d)
-    # print(g)
     dz = None
     gz = None
     if (len(set(d)) == 1):
       dz = [0 for _ in d]
     else:
-      # dz = zscore(d)
       dz = normalize(d)
 
     if (len(set(g)) == 1):
       gz = [0 for _ in g]
     else:
-      # gz = zscore(g)
       gz = normalize(g)
-
-    # print(dz)
-    # print(gz)
 
     combined = [(v, dz[i] + gz[i], d[i]) for i,v in enumerate(good)]
     combined.sort(key = lambda x : (x[1], x[2]))
