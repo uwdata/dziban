@@ -47,6 +47,13 @@ class Base:
       self._encodings.append(count_enc)
       props.pop('aggregate')
     
+    if ('aggregate', None) in props.items():
+      none_agg_enc = Encoding(aggregate=None)
+      self._encodings.append(none_agg_enc)
+      props.pop('aggregate')
+
+      self._encodings = filter(lambda e : not (e._condition[0] == 'aggregate' and e._condition[1] == 'count'), self._encodings)
+
     for v in values:
       enc = Encoding(**{ key: v } )
 

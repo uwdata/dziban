@@ -13,12 +13,12 @@ from .channel import Channel
 from .util import filter_sols, foreach, construct_graph, normalize
 
 class Chart(Field, Channel):
-  DEFAULT_NAME = '\"view\"'
-  ANCHOR_NAME = '\"anchor\"'
+  DEFAULT_NAME = 'v_v'
+  ANCHOR_NAME = 'anchor'
   OPT_DRACO_FILES = list(filter(lambda file : file != 'optimize.lp', DRACO_LP)) + ['optimize.lp']
   OPT_GRAPHSCAPE_FILES = list(filter(lambda file : file != 'optimize.lp', DRACO_LP)) + ['optimize_graphscape.lp']
   OPT_DRACO_THEN_GRAPHSCAPE_FILES = list(filter(lambda file : file != 'optimize.lp', DRACO_LP)) + ['optimize_draco.lp']
-  K = 40
+  K = 200
 
   def __init__(self, data):
     Base.__init__(self, data)
@@ -39,22 +39,37 @@ class Chart(Field, Channel):
   def is_satisfiable(self):
     return self._get_draco_sol() is not None
 
-  def _get_graphscape_score(self, anchor=None):
-    if (anchor is not None):
-      query = self.anchor_on(anchor)._get_anchor_asp() + self._get_asp_complete() + schema2asp(self._schema)
+  # def _get_graphscape_score(self, anchor=None):
+  #   if (anchor is not None):
+  #     query = self.anchor_on(anchor)._get_anchor_asp() + self._get_asp_complete() + schema2asp(self._schema)
       
-      files = list(filter(lambda file : file != 'generate.lp', Chart.OPT_GRAPHSCAPE_FILES))
+  #     files = list(filter(lambda file : file != 'generate.lp', Chart.OPT_GRAPHSCAPE_FILES))
 
-      result = draco(query, files=files, silence_warnings=True)
-      return result.g
-    else:
-      if (self._anchor is None):
-        raise Exception("Must provide anchor for non-anchored chart")
+  #     result = draco(query, files=files, silence_warnings=True)
+  #     return result.g
+  #   else:
+  #     if (self._anchor is None):
+  #       raise Exception("Must provide anchor for non-anchored chart")
 
-      return self._get_draco_sol().g
+  #     return self._get_draco_sol().g
 
-  def _get_draco_score(self):
-    return self._get_draco_sol().d
+  # def _get_normalized_graphscape_score(self, anchor=None):
+  #   own = self._get_graphscape_score(anchor)
+  #   if (anchor is not None):
+  #     query = self.anchor_on(anchor)._get_anchor_asp() + self._get_asp_complete() + schema2asp(self._schema)
+      
+  #     files = list(filter(lambda file : file != 'generate.lp', Chart.OPT_GRAPHSCAPE_FILES))
+
+  #     result = draco(query, files=files, silence_warnings=True)
+  #     return result.g
+  #   else:
+  #     if (self._anchor is None):
+  #       raise Exception("Must provide anchor for non-anchored chart")
+
+  #     return self._get_draco_sol().g
+
+  # def _get_draco_score(self):
+  #   return self._get_draco_sol().d
 
   def __sub__(self, other):
     query = self.anchor_on(other)._get_anchor_asp() + self._get_asp_complete()
@@ -69,7 +84,7 @@ class Chart(Field, Channel):
 
   def _get_asp_partial(self):
     vid = self._name
-    asp = ['visualization({0}).'.format(vid)]
+    asp = ['view({0}).'.format(vid)]
     asp += schema2asp(self._schema)
 
     if (self._mark is not None):
@@ -112,60 +127,183 @@ class Chart(Field, Channel):
 
     return query
 
-  def _get_draco_rank(self):
-    return self._get_rank('draco')
+  # def _get_draco_rank(self):
+  #   return self._get_rank('draco')
 
-  def _get_graphscape_rank(self, anchor=None):  # anchor optional for already anchored charts
-    return self._get_rank('graphscape', anchor=anchor)
+  # def _get_graphscape_rank(self, anchor=None):  # anchor optional for already anchored charts
+  #   return self._get_rank('graphscape', anchor=anchor)
 
-  def _get_rank(self, function, anchor=None):
-    opt = None
+  def _get_stats(self, anchor=None):
+    evalk = Chart.K
 
-    if (function == 'graphscape'):
-      opt = Chart.OPT_GRAPHSCAPE_FILES
-    elif (function == 'draco'):
-      opt = Chart.OPT_DRACO_THEN_GRAPHSCAPE_FILES
+    own_sol = None
+    own_draco_score = None
+    own_graphscape_score = None
+
+    own_spec = None
+
+    draco_query = None
+    if (anchor):
+      draco_query = self.clone().anchor_on(anchor)._get_full_query()
     else:
-      raise Exception("invalid function (graphscape or draco)")
+      if self._anchor is None:
+        raise Exception("cold recommendation requires anchor")
+      draco_query = self._get_full_query()
 
-    best_vegalite = json.dumps(self._get_vegalite(), sort_keys=True)
+    topk_draco = draco(draco_query, files=Chart.OPT_DRACO_THEN_GRAPHSCAPE_FILES, topk=True, k=evalk, silence_warnings=True)
+
+    if (anchor):
+      own_sol = topk_draco[0]
+    else:
+      if self._anchor is None:
+        raise Exception("cold recommendation requires anchor")
+      own_sol = self._get_draco_sol()
+
+    own_draco_score = own_sol.d
+    own_graphscape_score = own_sol.g
+    own_spec = json.dumps(own_sol.props[Chart.DEFAULT_NAME])
+
+    actual_k_draco = len(topk_draco)
+    
+    topk_draco_scores = [x.d for x in topk_draco]
+    max_draco_score = max(topk_draco_scores)
+    min_draco_score = min(topk_draco_scores)
+    norm_draco_score = None
+    if (max_draco_score == min_draco_score):
+      if own_draco_score == max_draco_score:
+        norm_draco_score = 0
+      else:
+        norm_draco_score = None
+    else:
+      norm_draco_score = (own_draco_score - min_draco_score) / (max_draco_score - min_draco_score)
+
+    topk_draco_specs = { json.dumps(c.props[Chart.DEFAULT_NAME]): rank for rank, c in enumerate(topk_draco) }
+    for rank,c in enumerate(topk_draco):
+      if (rank > 0):
+        prev = topk_draco[rank - 1]
+        if prev.d == c.d:
+          topk_draco_specs[json.dumps(c.props[Chart.DEFAULT_NAME])] = topk_draco_specs[json.dumps(prev.props[Chart.DEFAULT_NAME])]
+
+
+    draco_rank = None
+    draco_of = None
+
+    if (own_spec in topk_draco_specs):
+      draco_rank = topk_draco_specs[own_spec]
+      draco_of = actual_k_draco
+    else:
+      draco_rank = None
+      draco_of = actual_k_draco
+
+
+    ## Graphscape
+    graphscape_query = None
+    if (anchor):
+      graphscape_query = self.clone().anchor_on(anchor)._get_full_query()
+    else:
+      if self._anchor is None:
+        raise Exception("cold recommendation requires anchor")
+      graphscape_query = self._get_full_query()
+    
+    topk_graphscape = draco(graphscape_query, files=Chart.OPT_GRAPHSCAPE_FILES, topk=True, k=evalk, silence_warnings=True)
+    actual_k_graphscape = len(topk_graphscape)
+
+    topk_graphscape_scores = [x.d for x in topk_graphscape]
+    max_graphscape_score = max(topk_graphscape_scores)
+    min_graphscape_score = min(topk_graphscape_scores)
+
+    norm_graphscape_score = None
+    if (max_graphscape_score == min_graphscape_score):
+      if own_graphscape_score == max_graphscape_score:
+        norm_graphscape_score = 0
+      else:
+        norm_graphscape_score = None
+    else:
+      norm_graphscape_score = (own_graphscape_score - min_graphscape_score) / (max_graphscape_score - min_graphscape_score)
+
+    topk_graphscape_specs = { json.dumps(c.props[Chart.DEFAULT_NAME]): rank for rank, c in enumerate(topk_graphscape)}
+    graphscape_rank = None
+    graphscape_of = None
+
+    for rank,c in enumerate(topk_graphscape):
+      if (rank > 0):
+        prev = topk_graphscape[rank - 1]
+        if prev.g == c.g:
+          topk_graphscape_specs[json.dumps(c.props[Chart.DEFAULT_NAME])] = topk_graphscape_specs[json.dumps(prev.props[Chart.DEFAULT_NAME])]
+
+
+    if (own_spec in topk_graphscape_specs):
+      graphscape_rank = topk_graphscape_specs[own_spec]
+      graphscape_of = actual_k_graphscape
+    else:
+      graphscape_rank = None
+      graphscape_of = actual_k_graphscape
+
+    return {
+      'draco_score': own_draco_score,
+      'norm_draco_score': norm_draco_score,
+      'draco_rank': draco_rank,
+      'draco_of': draco_of,
+      'graphscape_score': own_graphscape_score,
+      'norm_graphscape_score': norm_graphscape_score,
+      'graphscape_rank': graphscape_rank,
+      'graphscape_of': graphscape_of,
+    } 
+
+  # def _get_rank(self, function, anchor=None):
+  #   opt = None
+
+  #   if (function == 'graphscape'):
+  #     opt = Chart.OPT_GRAPHSCAPE_FILES
+  #   elif (function == 'draco'):
+  #     opt = Chart.OPT_DRACO_THEN_GRAPHSCAPE_FILES
+  #   else:
+  #     raise Exception("invalid function (graphscape or draco)")
+
+  #   best_vegalite = json.dumps(self._get_vegalite(), sort_keys=True)
       
 
-    query = None
+  #   query = None
 
-    if (function == 'graphscape'):
-      if (anchor):
-        query = self.clone().anchor_on(anchor)._get_full_query()
-      else:
-        if self._anchor is None:
-          raise Exception("cold recommendation requires an anchor")
-        query = self._get_full_query()
-    elif (function == 'draco'):
-      query = self._get_asp_partial()
+  #   if (function == 'graphscape'):
+  #     if (anchor):
+  #       query = self.clone().anchor_on(anchor)._get_full_query()
+  #     else:
+  #       if self._anchor is None:
+  #         raise Exception("cold recommendation requires an anchor")
+  #       query = self._get_full_query()
+  #   elif (function == 'draco'):
+  #     query = self._get_asp_partial()
 
-    topk = draco(query, files=opt, topk=True, k=Chart.K, silence_warnings=True)
+  #   topk = draco(query, files=opt, topk=True, k=50, silence_warnings=True)
 
-    actual_k = len(topk)  # if k is unsatisfiable, draco will return < k
+  #   actual_k = len(topk)  # if k is unsatisfiable, draco will return < k
 
-    topk_vegalite = { json.dumps(c.as_vl(Chart.DEFAULT_NAME), sort_keys=True):rank for rank, c in enumerate(topk) }
+  #   topk_vegalite = { json.dumps(c.as_vl(Chart.DEFAULT_NAME), sort_keys=True):rank for rank, c in enumerate(topk) }
 
-    if (best_vegalite in topk_vegalite):
-      return {
-        'rank': topk_vegalite[best_vegalite],
-        'of': actual_k
-      }
-    else:
-      return {
-        'rank': None,
-        'of': Chart.K
-      }
+  #   if (best_vegalite in topk_vegalite):
+  #     return {
+  #       'rank': topk_vegalite[best_vegalite],
+  #       'of': actual_k
+  #     }
+  #   else:
+  #     return {
+  #       'rank': None,
+  #       'of': Chart.K
+  #     }
 
   def _get_topk_from_anchor(self):
-    query = self._get_full_query()
-    best_graphscape = draco(query, files=Chart.OPT_GRAPHSCAPE_FILES, topk=True, k=Chart.K, silence_warnings=True)
-    best_draco = draco(query, files=Chart.OPT_DRACO_THEN_GRAPHSCAPE_FILES, topk=True, k=Chart.K, silence_warnings=True)
+    draco_query = self._get_full_query()
+    graphscape_query = self._get_full_query()
+    best_graphscape = draco(graphscape_query, files=Chart.OPT_GRAPHSCAPE_FILES, topk=True, k=Chart.K, silence_warnings=True)
+    best_draco = draco(draco_query, files=Chart.OPT_DRACO_THEN_GRAPHSCAPE_FILES, topk=True, k=Chart.K, silence_warnings=True)
 
-    good = filter_sols(best_graphscape, best_draco, Chart.DEFAULT_NAME)
+    # print([c.d for c in best_draco])
+
+    # return [(d,0) for d in best_draco]
+
+    # good = best_draco + best_graphscape
+    good = filter_sols(best_draco, best_graphscape, self._name)
     
     if (len(good) == 1):
       return [(good[0],0)]
@@ -180,14 +318,14 @@ class Chart(Field, Channel):
     if (len(set(d)) == 1):
       dz = [0 for _ in d]
     else:
-      dz = zscore(d)
-      # dz = normalize(d)
+      # dz = zscore(d)
+      dz = normalize(d)
 
     if (len(set(g)) == 1):
       gz = [0 for _ in g]
     else:
-      gz = zscore(g)
-      # gz = normalize(g)
+      # gz = zscore(g)
+      gz = normalize(g)
 
     # print(dz)
     # print(gz)
@@ -213,11 +351,15 @@ class Chart(Field, Channel):
     sol = self._get_draco_sol()
     return sol.draco_list
 
+  def anchor(self):
+    return self.anchor_on(self)
+
   def anchor_on(self, other):
     clone = self.clone()
 
     anchor_clone = other.clone()
-    anchor_clone._name = Chart.ANCHOR_NAME[:-1] + str(clone._id) + '\"'
+    anchor_clone._name = Chart.ANCHOR_NAME + str(clone._id)
+
     clone._id += 1
 
     clone._anchor = anchor_clone

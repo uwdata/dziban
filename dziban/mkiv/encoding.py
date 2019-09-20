@@ -1,4 +1,5 @@
 from copy import deepcopy
+import json
 
 class Encoding(object):
   CHANNELS = ['x', 'y', 'row', 'column', 'color', 'size', 'shape', 'text']
@@ -11,19 +12,19 @@ class Encoding(object):
     if (self._condition[0] == 'field'):
       self._condition = (self._condition[0], '\"{0}\"'.format(self._condition[1]))
 
-    self._field = None
-    self._ftype = None
-    self._aggregate = None
-    self._channel = None
+    self._field = False
+    self._type = False
+    self._aggregate = False
+    self._channel = False
     self._bin = None
-    self._maxbins = None
-    self._scale = None
+    self._maxbins = False
+    self._scale = False
 
   def clone(self):
     return deepcopy(self)
 
-  def ftype(self, value):
-    self._ftype = value
+  def type(self, value):
+    self._type = value
     return self
 
   def field(self, value):
@@ -58,41 +59,79 @@ class Encoding(object):
 
     condition_key = self._condition[0]
     condition_value = self._condition[1]
-    condition = '{0}({1},{2},{3})'.format(condition_key, vid, eid, condition_value)
 
-    declare = ':- not {0} : encoding({1},E).'.format(condition, vid)
+    declare = None
+    condition = None
+    if (condition_key == 'aggregate' and condition_value == None):
+      declare = ':- aggregate({0},_,count).'.format(vid)
+    else:
+      condition = '{0}({1},{2},{3})'.format(condition_key, vid, eid, condition_value)
+      declare = ':- not {0} : encoding({1},E).'.format(condition, vid)
+
     asp.append(declare)
 
     template = '{0}({1},{2},{3})'
+    none_template = 'not {0}({1},{2},_)'
 
-    if (self._field is not None):
-      field = template.format('field', vid, eid, '\"{0}\"'.format(self._field))
+    if (self._field is not False):
+      field = None
+
+      if (self._field is None):
+        field = none_template.format('field', vid, eid)
+      else:
+        field = template.format('field', vid, eid, '\"{0}\"'.format(self._field))
       facts.append(field)
 
-    if (self._ftype is not None):
-      ftype = template.format('type', vid, eid, self._ftype)
-      facts.append(ftype)
+    if (self._type is not False):
+      type = None
 
-    if (self._aggregate is not None):
+      if (self._type is None):
+        type = none_template.format('type', vid, eid)
+      else:
+        type = template.format('type', vid, eid, self._type)
+
+      facts.append(type)
+
+    if (self._aggregate is not False):
+      aggregate = None
+      if (self._aggregate is None):
+        aggregate = none_template.format('aggregate', vid, eid)
+      else:
         aggregate = template.format('aggregate', vid, eid, self._aggregate)
-        facts.append(aggregate)
+      facts.append(aggregate)
 
-    if (self._channel is not None):
-      channel = template.format('channel', vid, eid, self._channel)
+    if (self._channel is not False):
+      channel = None
+      
+      if (self._channel is None):
+        channel = none_template.format('channel', vid, eid)
+      else:
+        channel = template.format('channel', vid, eid, self._channel)
       facts.append(channel)
 
     if (self._bin is not None):
-      bins = 10 if self._maxbins is None else self._maxbins
-      bin = template.format('bin', vid, eid, bins)
+      bin = None
+      if (self._bin is False):
+        bin = none_template.format('bin', vid, eid)
+      else:
+        bins = 10 if self._maxbins is False else self._maxbins
+        bin = template.format('bin', vid, eid, bins)
       facts.append(bin)
 
-    if (self._scale is not None):
+    if (self._scale is not False):
       if (self._scale == 'log'):
         scale = 'log({0},{1})'.format(vid, eid)
-        facts.append(scale)
+      elif (self._scale == 'zero'):
+        scale = 'zero({0},{1})'.format(vid, eid)
+      facts.append(scale)
 
-    conditioned_facts = [':- not {0} : {1}.'.format(f, condition) for f in facts]
+    conditioned_facts = [':- {0}, not {1}.'.format(condition, f) for f in facts]
 
     asp += conditioned_facts
     return asp
     
+  def __repr__(self):
+    return json.dumps(self.__dict__)
+
+  def __str__(self):
+    return json.dumps(self.__dict__)
